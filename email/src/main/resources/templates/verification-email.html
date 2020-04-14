@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+  </head>
+
+  <body style="margin: 0; padding-left: 20%; padding-right: 20%;">
+    <table style="width: 100%; border-spacing: 0; font-size: 15px;">
+      <tr>
+        <th style="justify-content: center; font-size: 4rem; font-style: oblique; background-color: rgb(231, 231, 231); opacity: .6;">
+          PRIME BOX
+        </th>
+      </tr>
+      <tr>
+        <td style="font-size: 30px; padding-bottom: 20px;">
+          <h2 th:utext="#{verify.title}" style="font-weight: 100;">Security code</h2>
+        </td>
+      </tr>
+      <tr>
+        <td th:utext="#{verify.message}" style="padding-bottom: 20px;">Please use the following security code to verify your account.</td>
+      </tr>
+      <tr>
+        <td th:utext="#{verify.code(${code})}" style="padding-bottom: 45px;">No code</td>
+      </tr>
+      <tr>
+        <td th:utext="#{tnx}">Thanks,</td>
+      </tr>
+      <tr>
+        <td th:utext="#{team}" style="padding-bottom: 35px;">The PRIME BOX account team</td>
+      </tr>
+      <tr style="height: 40px">
+        <td th:utext=#{footer} style="text-align: center; font-weight: 800; opacity: .6; font-style: italic; background-color: rgb(231, 231, 231);">You are receiving this email because you have a PRIME BOX account.</td>
+      </tr>
+    </table>
+
+  </body>
+
+</html>

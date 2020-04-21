@@ -1,6 +1,8 @@
 package com.lamar.primebox.web.auth.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 import org.hibernate.annotations.GenericGenerator;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -8,6 +10,10 @@ import org.springframework.security.core.userdetails.UserDetails;
 import javax.persistence.*;
 import java.util.Collection;
 
+
+@Getter
+@Setter
+@ToString
 @Entity
 @Table(name = "user")
 public class User implements UserDetails {
@@ -35,85 +41,6 @@ public class User implements UserDetails {
     private String token;
     @Transient
     private long expireIn;
-
-    public String getUserID() {
-        return userID;
-    }
-
-    public void setUserID(String userID) {
-        this.userID = userID;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    @JsonIgnore
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getSurname() {
-        return surname;
-    }
-
-    public void setSurname(String surname) {
-        this.surname = surname;
-    }
-
-    public long getStored() {
-        return stored;
-    }
-
-    public void setStored(long stored) {
-        this.stored = stored;
-    }
-
-    public long getLimit() {
-        return limit;
-    }
-
-    public void setLimit(long limit) {
-        this.limit = limit;
-    }
-
-    public String getToken() {
-        return token;
-    }
-
-    public void setToken(String token) {
-        this.token = token;
-    }
-
-    public long getExpireIn() {
-        return expireIn;
-    }
-
-    public void setExpireIn(long expireIn) {
-        this.expireIn = expireIn;
-    }
-
-    @Override
-    public String toString() {
-        return "User [userID=" + userID + ", email=" + email + ", password=" + password + ", name=" + name
-                + ", surname=" + surname + ", stored=" + stored + ", limit=" + limit + "]";
-    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

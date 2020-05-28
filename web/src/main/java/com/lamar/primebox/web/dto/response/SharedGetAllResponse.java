@@ -1,6 +1,6 @@
 package com.lamar.primebox.web.dto.response;
 
-import com.lamar.primebox.web.dto.model.SharedDto;
+import com.lamar.primebox.web.dto.model.SharedFileDto;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -14,6 +14,6 @@ import java.util.List;
 @Accessors(chain = true)
 public class SharedGetAllResponse {
 
-    private List<SharedDto> shareds;
+    private List<SharedFileDto> shareds;
 
 }

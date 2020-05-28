@@ -2,6 +2,7 @@ package com.lamar.primebox.web.security;
 
 import com.lamar.primebox.web.dto.model.UserDto;
 import com.lamar.primebox.web.service.UserService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 
 @Service
+@Slf4j
 public class UserDetailsServiceImpl implements UserDetailsService {
     
     private UserService userService;

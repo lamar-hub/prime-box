@@ -2,7 +2,7 @@ package com.lamar.primebox.web.repo;
 
 import com.lamar.primebox.web.model.User;
 
-public interface UserDAO {
+public interface UserDao {
 
     User saveUser(User user);
 

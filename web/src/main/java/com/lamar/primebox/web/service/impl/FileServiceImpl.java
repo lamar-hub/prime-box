@@ -1,4 +1,4 @@
-package com.lamar.primebox.web.service;
+package com.lamar.primebox.web.service.impl;
 
 import com.lamar.primebox.web.dto.model.FileDownloadDto;
 import com.lamar.primebox.web.dto.model.FileDto;
@@ -6,9 +6,11 @@ import com.lamar.primebox.web.dto.model.FileSaveDto;
 import com.lamar.primebox.web.dto.model.FileUpdateDto;
 import com.lamar.primebox.web.model.File;
 import com.lamar.primebox.web.model.User;
-import com.lamar.primebox.web.repo.FileDAO;
-import com.lamar.primebox.web.repo.UserDAO;
+import com.lamar.primebox.web.repo.FileDao;
+import com.lamar.primebox.web.repo.UserDao;
+import com.lamar.primebox.web.service.FileService;
 import com.lamar.primebox.web.util.StorageProperties;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -22,16 +24,17 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class FileServiceImpl implements FileService {
 
-    private final FileDAO fileDAO;
-    private final UserDAO userDAO;
+    private final FileDao fileDao;
+    private final UserDao userDao;
     private final ModelMapper modelMapper;
     private final StorageProperties storageProperties;
 
-    public FileServiceImpl(FileDAO fileDAO, UserDAO userDAO, ModelMapper modelMapper, StorageProperties storageProperties) {
-        this.fileDAO = fileDAO;
-        this.userDAO = userDAO;
+    public FileServiceImpl(FileDao fileDao, UserDao userDao, ModelMapper modelMapper, StorageProperties storageProperties) {
+        this.fileDao = fileDao;
+        this.userDao = userDao;
         this.modelMapper = modelMapper;
         this.storageProperties = storageProperties;
     }
@@ -39,7 +42,7 @@ public class FileServiceImpl implements FileService {
     @Override
     @Transactional
     public List<FileDto> getAllUserFiles(String username) {
-        List<File> files = fileDAO.getAllUserFiles(username);
+        List<File> files = fileDao.getAllUserFiles(username);
         return files.stream().map(file -> modelMapper.map(file, FileDto.class)).collect(Collectors.toList());
     }
 
@@ -47,12 +50,12 @@ public class FileServiceImpl implements FileService {
     @Transactional
     public FileSaveDto saveFileDatabase(MultipartFile multipartFile, String username) throws Exception {
         File file = new File(multipartFile.getOriginalFilename(), multipartFile.getContentType(), (int) multipartFile.getSize(), new Date().getTime());
-        User user = userDAO.getUser(username);
+        User user = userDao.getUser(username);
         if (user.getStored() + file.getSize() > user.getLimit()) {
             throw new Exception("There are no space anymore!");
         }
         file.setUser(user);
-        fileDAO.saveFile(file);
+        fileDao.saveFile(file);
         saveFileDisk(multipartFile, file);
         user.setStored(user.getStored() + file.getSize());
         modelMapper.map(file, FileSaveDto.class).setUserStored(user.getStored());
@@ -67,7 +70,7 @@ public class FileServiceImpl implements FileService {
     @Override
     @Transactional
     public FileDto updateFile(FileUpdateDto fileUpdateDto) throws Exception {
-        File file = fileDAO.getFile(fileUpdateDto.getFileID());
+        File file = fileDao.getFile(fileUpdateDto.getFileID());
         if (file != null) {
             file.setFilename(fileUpdateDto.getFilename());
             return modelMapper.map(file, FileDto.class);
@@ -78,7 +81,7 @@ public class FileServiceImpl implements FileService {
     @Override
     @Transactional
     public FileDownloadDto getFile(String fileID) throws Exception {
-        File file = fileDAO.getFile(fileID);
+        File file = fileDao.getFile(fileID);
         if (file != null) {
             return modelMapper.map(file, FileDownloadDto.class).setFile(getFileFromDisk(file.getFileId()));
         }
@@ -93,10 +96,10 @@ public class FileServiceImpl implements FileService {
     @Override
     @Transactional
     public FileSaveDto deleteFile(String userId) throws Exception {
-        File file = fileDAO.getFile(userId);
+        File file = fileDao.getFile(userId);
         if (file != null) {
             file.getUser().setStored(file.getUser().getStored() - file.getSize());
-            fileDAO.deleteFile(file);
+            fileDao.deleteFile(file);
             deleteFileFromDisk(file.getFileId());
             return modelMapper.map(file, FileSaveDto.class).setUserStored(file.getUser().getStored());
         }

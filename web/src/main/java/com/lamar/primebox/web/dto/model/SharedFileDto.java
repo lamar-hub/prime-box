@@ -7,7 +7,7 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-public class SharedDto {
+public class SharedFileDto {
 
     private String sharedFileFileID;
     private String sharedFileFilename;

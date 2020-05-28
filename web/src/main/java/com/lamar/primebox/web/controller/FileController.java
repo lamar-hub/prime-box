@@ -10,6 +10,7 @@ import com.lamar.primebox.web.dto.response.FileGetAllResponse;
 import com.lamar.primebox.web.dto.response.FileSaveResponse;
 import com.lamar.primebox.web.dto.response.FileUpdateResponse;
 import com.lamar.primebox.web.service.FileService;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpHeaders;
@@ -26,6 +27,7 @@ import java.util.List;
 @CrossOrigin(origins = "*",
         methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.OPTIONS})
 @RequestMapping("/api/files")
+@Slf4j
 public class FileController {
 
     private final FileService fileService;

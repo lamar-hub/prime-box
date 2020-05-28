@@ -1,6 +1,8 @@
-package com.lamar.primebox.web.repo;
+package com.lamar.primebox.web.repo.impl;
 
 import com.lamar.primebox.web.model.File;
+import com.lamar.primebox.web.repo.FileDao;
+import lombok.extern.slf4j.Slf4j;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
 import org.springframework.stereotype.Repository;
@@ -9,11 +11,12 @@ import javax.persistence.EntityManager;
 import java.util.List;
 
 @Repository
-public class FileDAOHibernateImpl implements FileDAO {
+@Slf4j
+public class FileDaoHibernateImpl implements FileDao {
 
     private final EntityManager entityManager;
 
-    public FileDAOHibernateImpl(EntityManager entityManager) {
+    public FileDaoHibernateImpl(EntityManager entityManager) {
         this.entityManager = entityManager;
     }
 

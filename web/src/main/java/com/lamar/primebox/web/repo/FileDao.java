@@ -4,7 +4,7 @@ import com.lamar.primebox.web.model.File;
 
 import java.util.List;
 
-public interface FileDAO {
+public interface FileDao {
 
     List<File> getAllUserFiles(String username);
 

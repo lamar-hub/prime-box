@@ -1,13 +1,15 @@
-package com.lamar.primebox.web.service;
+package com.lamar.primebox.web.service.impl;
 
 import com.lamar.primebox.web.dto.model.UserDto;
 import com.lamar.primebox.web.dto.model.UserBasicDto;
 import com.lamar.primebox.web.dto.model.UserCredentialsDto;
 import com.lamar.primebox.web.dto.model.UserJwtDto;
 import com.lamar.primebox.web.model.User;
-import com.lamar.primebox.web.repo.UserDAO;
+import com.lamar.primebox.web.repo.UserDao;
+import com.lamar.primebox.web.service.UserService;
 import com.lamar.primebox.web.util.CapacityUtil;
 import com.lamar.primebox.web.util.JwtUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -18,18 +20,19 @@ import javax.transaction.Transactional;
 import java.util.Optional;
 
 @Service
+@Slf4j
 public class UserServiceImpl implements UserService {
 
     private final AuthenticationManager authenticationManager;
-    private final UserDAO userDAO;
+    private final UserDao userDao;
     private final PasswordEncoder passwordEncoder;
     private final ModelMapper modelMapper;
     private final JwtUtil jwtUtil;
     private final CapacityUtil capacityUtil;
 
-    public UserServiceImpl(AuthenticationManager authenticationManager, UserDAO userDAO, PasswordEncoder passwordEncoder, ModelMapper modelMapper, JwtUtil jwtUtil, CapacityUtil capacityUtil) {
+    public UserServiceImpl(AuthenticationManager authenticationManager, UserDao userDao, PasswordEncoder passwordEncoder, ModelMapper modelMapper, JwtUtil jwtUtil, CapacityUtil capacityUtil) {
         this.authenticationManager = authenticationManager;
-        this.userDAO = userDAO;
+        this.userDao = userDao;
         this.passwordEncoder = passwordEncoder;
         this.modelMapper = modelMapper;
         this.jwtUtil = jwtUtil;
@@ -40,7 +43,7 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public UserDto getUser(String username) throws Exception {
         if (username != null) {
-            User user = userDAO.getByUsername(username);
+            User user = userDao.getByUsername(username);
             return modelMapper.map(user, UserDto.class);
         }
         throw new Exception("Exception! User was not found!");
@@ -49,7 +52,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public UserDto addUser(UserBasicDto userBasicDto) throws Exception {
-        User user = userDAO.getByUsername(userBasicDto.getUsername());
+        User user = userDao.getByUsername(userBasicDto.getUsername());
         if (user == null) {
             user = new User()
                     .setEmail(userBasicDto.getUsername())
@@ -67,7 +70,7 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public UserJwtDto authenticateUser(UserCredentialsDto userCredentialsDto) throws Exception {
         authenticate(userCredentialsDto.getUsername(), userCredentialsDto.getPassword());
-        User user = userDAO.getByUsername(userCredentialsDto.getUsername());
+        User user = userDao.getByUsername(userCredentialsDto.getUsername());
         if (user != null) {
             String jwtToken = jwtUtil.generateToken(user.getUserID(), user.getUsername());
             return new UserJwtDto().setJwtToken(jwtToken);
@@ -84,7 +87,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public UserDto updateUser(UserBasicDto userBasicDto) throws Exception {
-        User user = userDAO.getByUsername(userBasicDto.getUsername());
+        User user = userDao.getByUsername(userBasicDto.getUsername());
         if (user != null) {
             user.setName(userBasicDto.getName())
                     .setSurname(userBasicDto.getSurname());
@@ -96,8 +99,8 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public UserDto deactivateUser(String username) throws Exception {
-        User user = userDAO.getByUsername(username);
-        if (userDAO.deleteUser(user.getUserID()) == 1) {
+        User user = userDao.getByUsername(username);
+        if (userDao.deleteUser(user.getUserID()) == 1) {
             return modelMapper.map(user, UserDto.class);
         }
         throw new Exception("Exception! User was not updated!");

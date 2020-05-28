@@ -16,7 +16,7 @@ import java.util.Date;
 @Accessors(chain = true)
 @Entity
 @Table(name = "shared")
-public class Shared {
+public class SharedFile {
 
     @Id
     @ManyToOne
@@ -31,7 +31,7 @@ public class Shared {
     @Column(name = "date")
     private long date;
 
-    public Shared(String message, long date) {
+    public SharedFile(String message, long date) {
         this.message = message;
         this.date = date;
     }

@@ -7,7 +7,7 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-public class SharedUnshareResponse {
+public class SharedFileUnshareResponse {
 
     private String sharedFileFileID;
     private String sharedFileFilename;

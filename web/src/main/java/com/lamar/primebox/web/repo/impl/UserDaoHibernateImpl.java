@@ -1,6 +1,8 @@
-package com.lamar.primebox.web.repo;
+package com.lamar.primebox.web.repo.impl;
 
 import com.lamar.primebox.web.model.User;
+import com.lamar.primebox.web.repo.UserDao;
+import lombok.extern.slf4j.Slf4j;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
 import org.springframework.stereotype.Repository;
@@ -8,11 +10,12 @@ import org.springframework.stereotype.Repository;
 import javax.persistence.EntityManager;
 
 @Repository
-public class UserDAOHibernateImpl implements UserDAO {
+@Slf4j
+public class UserDaoHibernateImpl implements UserDao {
 
     private final EntityManager entityManager;
 
-    public UserDAOHibernateImpl(EntityManager entityManager) {
+    public UserDaoHibernateImpl(EntityManager entityManager) {
         this.entityManager = entityManager;
     }
 

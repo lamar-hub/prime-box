@@ -9,7 +9,7 @@ import lombok.experimental.Accessors;
 @Setter
 @ToString
 @Accessors(chain = true)
-public class SharedUnshareDto {
+public class SharedFileUnshareDto {
     
     private String fileId;
     private String username;

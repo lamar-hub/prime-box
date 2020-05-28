@@ -19,26 +19,26 @@
     </tr>
     <tr>
         <td style="font-size: 30px; padding-bottom: 20px;">
-            <h2 style="font-weight: 100;" th:utext="#{shared.title}">Shared
+            <h2 style="font-weight: 100;" th:utext="#{sharedFile.title}">Shared
                 file</h2>
         </td>
     </tr>
     <tr>
         <td
                 style="padding-bottom: 20px;"
-                th:utext="#{shared.text(${name},${surname},${email},${filename})}">No text
+                th:utext="#{sharedFile.text(${name},${surname},${email},${filename})}">No text
         </td>
     </tr>
     <tr th:if="${message} != null">
         <td style="padding-bottom: 20px; display: flex; flex-direction: row;">
             <p style="text-decoration-line: underline;"
-               th:utext="#{shared.message}">Message:</p>
+               th:utext="#{sharedFile.message}">Message:</p>
             <p style="padding-left: 10px;" th:utext="${message}">No Message</p>
         </td>
     </tr>
     <tr>
         <td><a th:href="@{'http://localhost:8080/api/files/' + ${fileID}}"
-               th:utext="#{shared.download}">Download
+               th:utext="#{sharedFile.download}">Download
             file</a></td>
     </tr>
     <tr>

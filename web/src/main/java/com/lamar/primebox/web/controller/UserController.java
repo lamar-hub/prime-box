@@ -12,6 +12,7 @@ import com.lamar.primebox.web.dto.response.UserLogInResponse;
 import com.lamar.primebox.web.dto.response.UserSignUpResponse;
 import com.lamar.primebox.web.dto.response.UserUpdateResponse;
 import com.lamar.primebox.web.service.UserService;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -21,6 +22,8 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @CrossOrigin(origins = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT,
         RequestMethod.DELETE, RequestMethod.PATCH})
+@RequestMapping("/api/users")
+@Slf4j
 public class UserController {
 
     private final UserService userService;
@@ -31,23 +34,7 @@ public class UserController {
         this.modelMapper = modelMapper;
     }
 
-    @PostMapping("/sign-up")
-    public ResponseEntity<UserSignUpResponse> addUser(@RequestBody UserSignUpRequest signUpRequest) throws Exception {
-        UserBasicDto userBasicDto = modelMapper.map(signUpRequest, UserBasicDto.class);
-        UserDto userDto = userService.addUser(userBasicDto);
-        UserSignUpResponse signUpResponse = modelMapper.map(userDto, UserSignUpResponse.class);
-        return ResponseEntity.ok(signUpResponse);
-    }
-
-    @PostMapping("/log-in")
-    public ResponseEntity<?> createAuthenticationToken(@RequestBody UserLogInRequest logInRequest) throws Exception {
-        UserCredentialsDto userCredentialsDto = modelMapper.map(logInRequest, UserCredentialsDto.class);
-        UserJwtDto userJwtDto = userService.authenticateUser(userCredentialsDto);
-        UserLogInResponse logInResponse = modelMapper.map(userJwtDto, UserLogInResponse.class);
-        return ResponseEntity.ok(logInResponse);
-    }
-
-    @PatchMapping("/users")
+    @PatchMapping("")
     public ResponseEntity<?> updateUser(@RequestBody UserUpdateRequest updateRequest) throws Exception {
         UserBasicDto userBasicDto = modelMapper.map(updateRequest, UserBasicDto.class);
         userBasicDto.setUsername(getUsernameFromSecurityContext());
@@ -56,7 +43,7 @@ public class UserController {
         return ResponseEntity.ok(updateResponse);
     }
 
-    @DeleteMapping("/users")
+    @DeleteMapping("")
     public ResponseEntity<?> deactivateUser() throws Exception {
         UserDto userDto = userService.deactivateUser(getUsernameFromSecurityContext());
         UserDeleteResponse userDeleteResponse = modelMapper.map(userDto, UserDeleteResponse.class);

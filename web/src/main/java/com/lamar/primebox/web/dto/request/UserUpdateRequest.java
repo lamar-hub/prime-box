@@ -4,6 +4,8 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
 import java.io.Serializable;
 
 @Getter
@@ -11,8 +13,14 @@ import java.io.Serializable;
 @ToString
 public class UserUpdateRequest implements Serializable {
 
+    @Size(min = 6, max = 20)
+    @NotBlank
     private String password;
+
+    @NotBlank
     private String name;
+
+    @NotBlank
     private String surname;
-    
+
 }

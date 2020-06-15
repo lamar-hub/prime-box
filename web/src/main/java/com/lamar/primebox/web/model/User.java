@@ -10,6 +10,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
+import javax.validation.constraints.*;
 import java.util.Collection;
 
 
@@ -24,21 +25,37 @@ public class User implements UserDetails {
 
     private static final long serialVersionUID = 4832588063114528104L;
 
+    @NotBlank
     @Id
     @GeneratedValue(generator = "uuid2", strategy = GenerationType.AUTO)
     @GenericGenerator(name = "uuid2", strategy = "uuid2")
     @Column(name = "user_id")
     private String userID;
+
+    @Email
     @Column(name = "email")
     private String email;
+
+    @Size(min = 6, max = 20)
+    @NotBlank
     @Column(name = "password")
     private String password;
+
+    @NotBlank
     @Column(name = "name")
     private String name;
+
+    @NotBlank
     @Column(name = "surname")
     private String surname;
+
+    @PositiveOrZero
+    @NotNull
     @Column(name = "used_storage")
     private long stored;
+
+    @Positive
+    @NotNull
     @Column(name = "capacity")
     private long limit;
 

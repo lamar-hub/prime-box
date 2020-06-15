@@ -7,6 +7,8 @@ import lombok.ToString;
 import lombok.experimental.Accessors;
 
 import javax.persistence.*;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import java.util.Date;
 
 @Getter
@@ -18,16 +20,22 @@ import java.util.Date;
 @Table(name = "shared")
 public class SharedFile {
 
+    @Valid
     @Id
     @ManyToOne
     @JoinColumn(name = "shared_user_id")
     private User sharedUser;
+
+    @Valid
     @Id
     @ManyToOne
     @JoinColumn(name = "shared_file_id")
     private File sharedFile;
+
     @Column(name = "message")
     private String message;
+
+    @NotNull
     @Column(name = "date")
     private long date;
 

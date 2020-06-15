@@ -21,6 +21,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 @RestController
@@ -46,14 +49,14 @@ public class FileController {
     }
 
     @PostMapping("")
-    public ResponseEntity<?> saveFile(@RequestParam("file") MultipartFile multipartFile) throws Exception {
+    public ResponseEntity<?> saveFile(@RequestParam("file") @NotNull MultipartFile multipartFile) throws Exception {
         FileSaveDto fileSaveDto = fileService.saveFileDatabase(multipartFile, getUsernameFromSecurityContext());
         FileSaveResponse saveResponse = modelMapper.map(fileSaveDto, FileSaveResponse.class);
         return ResponseEntity.ok(saveResponse);
     }
 
     @PutMapping("")
-    public ResponseEntity<?> updateFilename(@RequestBody FileUpdateRequest fileUpdateRequest) throws Exception {
+    public ResponseEntity<?> updateFilename(@RequestBody @Valid FileUpdateRequest fileUpdateRequest) throws Exception {
         FileUpdateDto fileUpdateDto = modelMapper.map(fileUpdateRequest, FileUpdateDto.class);
         FileDto fileDto = fileService.updateFile(fileUpdateDto);
         FileUpdateResponse fileUpdateResponse = modelMapper.map(fileDto, FileUpdateResponse.class);
@@ -61,7 +64,7 @@ public class FileController {
     }
 
     @GetMapping("/{fileId}/download")
-    public ResponseEntity<ByteArrayResource> getFile(@PathVariable String fileId) throws Exception {
+    public ResponseEntity<ByteArrayResource> getFile(@PathVariable @NotBlank String fileId) throws Exception {
         FileDownloadDto fileDownloadDto = fileService.getFile(fileId);
         ByteArrayResource resource = new ByteArrayResource(fileDownloadDto.getFile());
         return ResponseEntity
@@ -74,7 +77,7 @@ public class FileController {
     }
 
     @DeleteMapping("/{fileId}")
-    public ResponseEntity<?> deleteFile(@PathVariable String fileId) throws Exception {
+    public ResponseEntity<?> deleteFile(@PathVariable @NotBlank String fileId) throws Exception {
         FileSaveDto fileSaveDto = fileService.deleteFile(fileId);
         FileDeleteResponse fileDeleteResponse = modelMapper.map(fileSaveDto, FileDeleteResponse.class);
         return ResponseEntity.ok(fileDeleteResponse);

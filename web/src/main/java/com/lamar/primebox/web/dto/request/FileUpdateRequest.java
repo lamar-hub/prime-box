@@ -4,12 +4,17 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
+import javax.validation.constraints.NotBlank;
+
 @Getter
 @Setter
 @ToString
 public class FileUpdateRequest {
 
+    @NotBlank
     private String fileID;
+
+    @NotBlank
     private String filename;
-    
+
 }

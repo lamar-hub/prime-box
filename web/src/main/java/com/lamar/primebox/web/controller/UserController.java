@@ -1,15 +1,9 @@
 package com.lamar.primebox.web.controller;
 
 import com.lamar.primebox.web.dto.model.UserBasicDto;
-import com.lamar.primebox.web.dto.model.UserCredentialsDto;
 import com.lamar.primebox.web.dto.model.UserDto;
-import com.lamar.primebox.web.dto.model.UserJwtDto;
-import com.lamar.primebox.web.dto.request.UserLogInRequest;
-import com.lamar.primebox.web.dto.request.UserSignUpRequest;
 import com.lamar.primebox.web.dto.request.UserUpdateRequest;
 import com.lamar.primebox.web.dto.response.UserDeleteResponse;
-import com.lamar.primebox.web.dto.response.UserLogInResponse;
-import com.lamar.primebox.web.dto.response.UserSignUpResponse;
 import com.lamar.primebox.web.dto.response.UserUpdateResponse;
 import com.lamar.primebox.web.service.UserService;
 import lombok.extern.slf4j.Slf4j;
@@ -18,6 +12,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
 
 @RestController
 @CrossOrigin(origins = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT,
@@ -35,7 +31,7 @@ public class UserController {
     }
 
     @PatchMapping("")
-    public ResponseEntity<?> updateUser(@RequestBody UserUpdateRequest updateRequest) throws Exception {
+    public ResponseEntity<?> updateUser(@RequestBody @Valid UserUpdateRequest updateRequest) throws Exception {
         UserBasicDto userBasicDto = modelMapper.map(updateRequest, UserBasicDto.class);
         userBasicDto.setUsername(getUsernameFromSecurityContext());
         UserDto userDto = this.userService.updateUser(userBasicDto);

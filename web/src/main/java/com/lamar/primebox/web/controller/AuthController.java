@@ -14,6 +14,8 @@ import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
+
 @RestController
 @CrossOrigin(origins = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT,
         RequestMethod.DELETE, RequestMethod.PATCH})
@@ -29,7 +31,7 @@ public class AuthController {
     }
 
     @PostMapping("/sign-up")
-    public ResponseEntity<UserSignUpResponse> addUser(@RequestBody UserSignUpRequest signUpRequest) throws Exception {
+    public ResponseEntity<UserSignUpResponse> addUser(@RequestBody @Valid UserSignUpRequest signUpRequest) throws Exception {
         UserBasicDto userBasicDto = modelMapper.map(signUpRequest, UserBasicDto.class);
         UserDto userDto = userService.addUser(userBasicDto);
         UserSignUpResponse signUpResponse = modelMapper.map(userDto, UserSignUpResponse.class);
@@ -37,7 +39,7 @@ public class AuthController {
     }
 
     @PostMapping("/log-in")
-    public ResponseEntity<?> createAuthenticationToken(@RequestBody UserLogInRequest logInRequest) throws Exception {
+    public ResponseEntity<?> createAuthenticationToken(@RequestBody @Valid UserLogInRequest logInRequest) throws Exception {
         UserCredentialsDto userCredentialsDto = modelMapper.map(logInRequest, UserCredentialsDto.class);
         UserJwtDto userJwtDto = userService.authenticateUser(userCredentialsDto);
         UserLogInResponse logInResponse = modelMapper.map(userJwtDto, UserLogInResponse.class);

@@ -4,9 +4,9 @@ import com.lamar.primebox.web.dto.model.SharedFileDto;
 import com.lamar.primebox.web.dto.model.SharedFileShareDto;
 import com.lamar.primebox.web.dto.model.SharedFileUnshareDto;
 import com.lamar.primebox.web.dto.request.SharedFileShareRequest;
-import com.lamar.primebox.web.dto.response.SharedGetAllResponse;
 import com.lamar.primebox.web.dto.response.SharedFileShareResponse;
 import com.lamar.primebox.web.dto.response.SharedFileUnshareResponse;
+import com.lamar.primebox.web.dto.response.SharedGetAllResponse;
 import com.lamar.primebox.web.service.SharedFileService;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -15,6 +15,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
 import java.util.List;
 
 @RestController
@@ -33,14 +35,14 @@ public class SharedFileController {
     }
 
     @GetMapping("")
-    public ResponseEntity<?> getAllUserShareds() {
+    public ResponseEntity<?> getAllUserSharedFiles() {
         List<SharedFileDto> sharedFileDtoList = sharedService.getAllUserSharedFiles(getUsernameFromSecurityContext());
         SharedGetAllResponse sharedGetAllResponse = modelMapper.map(sharedFileDtoList, SharedGetAllResponse.class);
         return ResponseEntity.ok(sharedGetAllResponse);
     }
 
     @PostMapping("")
-    public ResponseEntity<?> shareFile(@RequestBody SharedFileShareRequest sharedFileShareRequest) throws Exception {
+    public ResponseEntity<?> shareFile(@RequestBody @Valid SharedFileShareRequest sharedFileShareRequest) throws Exception {
         SharedFileShareDto sharedFileShareDto = modelMapper.map(sharedFileShareRequest, SharedFileShareDto.class);
         SharedFileDto sharedFileDto = sharedService.share(sharedFileShareDto);
         SharedFileShareResponse shareResponse = modelMapper.map(sharedFileDto, SharedFileShareResponse.class);
@@ -48,7 +50,7 @@ public class SharedFileController {
     }
 
     @DeleteMapping("/{fileId}")
-    public ResponseEntity<?> unshareFile(@PathVariable String fileId) throws Exception {
+    public ResponseEntity<?> unshareFile(@PathVariable @NotBlank String fileId) throws Exception {
         SharedFileDto sharedFileDto = sharedService.unshare(new SharedFileUnshareDto().setFileId(fileId).setUsername(getUsernameFromSecurityContext()));
         SharedFileUnshareResponse sharedFileUnshareResponse = modelMapper.map(sharedFileDto, SharedFileUnshareResponse.class);
         return ResponseEntity.ok(sharedFileUnshareResponse);

@@ -7,6 +7,10 @@ import lombok.ToString;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
+import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Positive;
 
 @Getter
 @Setter
@@ -16,19 +20,31 @@ import javax.persistence.*;
 @Table(name = "file")
 public class File {
 
+    @NotBlank
     @Id
     @GeneratedValue(generator = "uuid2")
     @GenericGenerator(name = "uuid2", strategy = "uuid2")
     @Column(name = "file_id")
     private String fileId;
+
+    @NotBlank
     @Column(name = "filename")
     private String filename;
+
+    @NotBlank
     @Column(name = "type")
     private String type;
+
+    @Positive
+    @NotNull
     @Column(name = "size")
     private long size;
+
+    @NotNull
     @Column(name = "last_modified")
     private long lastModified;
+
+    @Valid
     @ManyToOne(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
     @JoinColumn(name = "user_id")
     private User user;

@@ -98,7 +98,8 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public UserDto deactivateUser(String username) throws Exception {
         final User user = userDao.getByUsername(username);
-        if (userDao.deleteUser(user.getUserId()) == 1) {
+        if (user != null) {
+            //TODO Deactivate user
             return modelMapper.map(user, UserDto.class);
         }
         throw new Exception("Exception! User was not deactivated!");

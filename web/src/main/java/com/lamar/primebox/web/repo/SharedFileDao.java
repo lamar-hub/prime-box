@@ -6,12 +6,12 @@ import java.util.List;
 
 public interface SharedFileDao {
 
-    List<SharedFile> getAllShared(String username);
+    List<SharedFile> getAllSharedFiles(String username);
 
-    SharedFile getShared(String fileId, String username);
+    SharedFile getSharedFile(String fileId, String username);
 
-    SharedFile saveShared(SharedFile sharedFile);
+    void saveSharedFile(SharedFile sharedFile);
 
-    void deleteShared(SharedFile sharedFile);
+    void deleteSharedFile(SharedFile sharedFile);
 
 }

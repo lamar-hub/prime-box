@@ -8,6 +8,10 @@ import org.hibernate.query.Query;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 
 @Repository
 @Slf4j
@@ -20,48 +24,29 @@ public class UserDaoHibernateImpl implements UserDao {
     }
 
     @Override
-    public User saveUser(User user) {
-        Session session = entityManager.unwrap(Session.class);
+    public void saveUser(User user) {
+        final Session session = entityManager.unwrap(Session.class);
+
         session.save(user);
-        return user;
     }
 
     @Override
     public User getUser(String id) {
-        Session session = entityManager.unwrap(Session.class);
+        final Session session = entityManager.unwrap(Session.class);
+        
         return session.get(User.class, id);
     }
 
     @Override
     public User getByUsername(String username) {
-        Session session = entityManager.unwrap(Session.class);
-        Query<User> query = session.createQuery("SELECT u FROM User u WHERE u.email=:email", User.class);
-        query.setParameter("email", username);
-        return query.getSingleResult();
-    }
+        final Session session = entityManager.unwrap(Session.class);
+        final CriteriaBuilder builder = session.getCriteriaBuilder();
+        final CriteriaQuery<User> criteriaQuery = builder.createQuery(User.class);
+        final Root<User> root = criteriaQuery.from(User.class);
+        final Predicate predicate = builder.equal(root.get("email"), username);
+        criteriaQuery.select(root).where(predicate);
+        final Query<User> query = session.createQuery(criteriaQuery);
 
-    @Override
-    public User updateUser(User user) {
-        Session session = entityManager.unwrap(Session.class);
-        session.update(user);
-        return user;
-    }
-
-    @Override
-    public int deleteUser(String userID) {
-        Session session = entityManager.unwrap(Session.class);
-        @SuppressWarnings("rawtypes")
-        Query query = session.createQuery("DELETE FROM User u WHERE u.userId=:userID");
-        query.setParameter("userID", userID);
-        return query.executeUpdate();
-    }
-
-    @Override
-    public User existUser(String email, String password) {
-        Session session = entityManager.unwrap(Session.class);
-        Query<User> query = session.createQuery("SELECT u FROM User u WHERE u.email=:email AND u.password=:password", User.class);
-        query.setParameter("email", email);
-        query.setParameter("password", password);
         return query.getSingleResult();
     }
 

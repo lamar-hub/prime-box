@@ -8,6 +8,10 @@ import org.hibernate.query.Query;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 import java.util.List;
 
 @Repository
@@ -22,34 +26,37 @@ public class FileDaoHibernateImpl implements FileDao {
 
     @Override
     public List<File> getAllUserFiles(String username) {
-        Session session = entityManager.unwrap(Session.class);
-        Query<File> query = session.createQuery("SELECT f FROM File f WHERE f.user.email=:email", File.class);
-        query.setParameter("email", username);
+        final Session session = entityManager.unwrap(Session.class);
+        final CriteriaBuilder builder = session.getCriteriaBuilder();
+        final CriteriaQuery<File> criteriaQuery = builder.createQuery(File.class);
+        final Root<File> root = criteriaQuery.from(File.class);
+        final Predicate predicateEmail = builder.equal(root.get("user").get("email"), username);
+        criteriaQuery
+                .select(root)
+                .where(predicateEmail);
+        final Query<File> query = session.createQuery(criteriaQuery);
+
         return query.getResultList();
     }
 
     @Override
     public void saveFile(File file) {
-        Session session = entityManager.unwrap(Session.class);
+        final Session session = entityManager.unwrap(Session.class);
+
         session.save(file);
     }
 
     @Override
-    public File getFile(String fileID) {
-        Session session = entityManager.unwrap(Session.class);
-        return session.get(File.class, fileID);
-    }
+    public File getFile(String fileId) {
+        final Session session = entityManager.unwrap(Session.class);
 
-    @Override
-    public File updateFile(File file) {
-        Session session = entityManager.unwrap(Session.class);
-        session.update(file);
-        return file;
+        return session.get(File.class, fileId);
     }
 
     @Override
     public void deleteFile(File file) {
-        Session session = entityManager.unwrap(Session.class);
+        final Session session = entityManager.unwrap(Session.class);
+
         session.delete(file);
     }
 

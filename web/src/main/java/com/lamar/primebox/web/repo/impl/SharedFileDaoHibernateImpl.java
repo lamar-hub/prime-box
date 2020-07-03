@@ -8,6 +8,10 @@ import org.hibernate.query.Query;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 import java.util.List;
 
 @Repository
@@ -21,35 +25,48 @@ public class SharedFileDaoHibernateImpl implements SharedFileDao {
     }
 
     @Override
-    public List<SharedFile> getAllShared(String username) {
-        Session session = entityManager.unwrap(Session.class);
-        @SuppressWarnings("rawtypes")
-        Query query = session.createQuery("FROM SharedFile s WHERE s.sharedUser.email=:username");
-        query.setParameter("username", username);
-        @SuppressWarnings("unchecked")
-        List<SharedFile> list = query.list();
-        return list;
+    public List<SharedFile> getAllSharedFiles(String username) {
+        final Session session = entityManager.unwrap(Session.class);
+        final CriteriaBuilder builder = session.getCriteriaBuilder();
+        final CriteriaQuery<SharedFile> criteriaQuery = builder.createQuery(SharedFile.class);
+        final Root<SharedFile> root = criteriaQuery.from(SharedFile.class);
+        final Predicate predicateEmail = builder.equal(root.get("sharedUser").get("email"), username);
+        criteriaQuery
+                .select(root)
+                .where(predicateEmail);
+        final Query<SharedFile> query = session.createQuery(criteriaQuery);
+
+        return query.getResultList();
     }
 
     @Override
-    public SharedFile getShared(String fileId, String username) {
-        Session session = entityManager.unwrap(Session.class);
-        Query query = session.createQuery("SELECT s FROM SharedFile s WHERE s.sharedUser.email=:username AND s.sharedFile.fileId=:fileId");
-        query.setParameter("username", username);
-        query.setParameter("fileId", fileId);
-        return (SharedFile) query.getSingleResult();
+    public SharedFile getSharedFile(String fileId, String username) {
+        final Session session = entityManager.unwrap(Session.class);
+        final CriteriaBuilder builder = session.getCriteriaBuilder();
+        final CriteriaQuery<SharedFile> criteriaQuery = builder.createQuery(SharedFile.class);
+        final Root<SharedFile> root = criteriaQuery.from(SharedFile.class);
+        final Predicate predicateFileId = builder.equal(root.get("sharedFile").get("fileId"), fileId);
+        final Predicate predicateEmail = builder.equal(root.get("sharedUser").get("email"), username);
+        criteriaQuery
+                .select(root)
+                .where(predicateFileId)
+                .where(predicateEmail);
+        final Query<SharedFile> query = session.createQuery(criteriaQuery);
+
+        return query.getSingleResult();
     }
 
     @Override
-    public SharedFile saveShared(SharedFile sharedFile) {
-        Session session = entityManager.unwrap(Session.class);
+    public void saveSharedFile(SharedFile sharedFile) {
+        final Session session = entityManager.unwrap(Session.class);
+
         session.save(sharedFile);
-        return sharedFile;
     }
 
     @Override
-    public void deleteShared(SharedFile sharedFile) {
-        Session session = entityManager.unwrap(Session.class);
+    public void deleteSharedFile(SharedFile sharedFile) {
+        final Session session = entityManager.unwrap(Session.class);
+
         session.delete(sharedFile);
     }
 

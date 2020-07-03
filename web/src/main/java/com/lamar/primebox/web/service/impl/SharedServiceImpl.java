@@ -40,7 +40,8 @@ public class SharedServiceImpl implements SharedFileService {
     @Override
     @Transactional
     public List<SharedFileDto> getAllUserSharedFiles(String username) {
-        final List<SharedFile> sharedFileList = sharedFileDao.getAllShared(username);
+        final List<SharedFile> sharedFileList = sharedFileDao.getAllSharedFiles(username);
+        
         return sharedFileList.stream().map(sharedFile -> modelMapper.map(sharedFile, SharedFileDto.class)).collect(Collectors.toList());
     }
 
@@ -49,6 +50,7 @@ public class SharedServiceImpl implements SharedFileService {
     public SharedFileDto share(SharedFileShareDto sharedFileShareDto) throws Exception {
         final File file = fileDao.getFile(sharedFileShareDto.getFileId());
         final User user = userDao.getByUsername(sharedFileShareDto.getSharedUserUsername());
+
         if (file != null && user != null) {
             final SharedFile sharedFile = new SharedFile()
                     .setSharedFile(file)
@@ -56,7 +58,7 @@ public class SharedServiceImpl implements SharedFileService {
                     .setDate(sharedFileShareDto.getSharedTime())
                     .setMessage(sharedFileShareDto.getMessage());
 
-            sharedFileDao.saveShared(sharedFile);
+            sharedFileDao.saveSharedFile(sharedFile);
             return modelMapper.map(sharedFile, SharedFileDto.class);
         }
         throw new Exception("Exception! File is not shared.");
@@ -65,9 +67,10 @@ public class SharedServiceImpl implements SharedFileService {
     @Override
     @Transactional
     public SharedFileDto unshare(SharedFileUnshareDto sharedFileUnshareDto) throws Exception {
-        final SharedFile sharedFile = sharedFileDao.getShared(sharedFileUnshareDto.getFileId(), sharedFileUnshareDto.getUsername());
+        final SharedFile sharedFile = sharedFileDao.getSharedFile(sharedFileUnshareDto.getFileId(), sharedFileUnshareDto.getUsername());
+
         if (sharedFile != null) {
-            sharedFileDao.deleteShared(sharedFile);
+            sharedFileDao.deleteSharedFile(sharedFile);
             return modelMapper.map(sharedFile, SharedFileDto.class);
         }
         throw new Exception("Exception! File is not shared.");

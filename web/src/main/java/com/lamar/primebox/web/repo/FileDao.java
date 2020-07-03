@@ -10,9 +10,7 @@ public interface FileDao {
 
     void saveFile(File file);
 
-    File getFile(String fileID);
-
-    File updateFile(File file);
+    File getFile(String fileId);
 
     void deleteFile(File file);
 

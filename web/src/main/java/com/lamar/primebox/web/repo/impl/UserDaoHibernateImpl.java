@@ -51,7 +51,7 @@ public class UserDaoHibernateImpl implements UserDao {
     public int deleteUser(String userID) {
         Session session = entityManager.unwrap(Session.class);
         @SuppressWarnings("rawtypes")
-        Query query = session.createQuery("DELETE FROM User u WHERE u.userID=:userID");
+        Query query = session.createQuery("DELETE FROM User u WHERE u.userId=:userID");
         query.setParameter("userID", userID);
         return query.executeUpdate();
     }

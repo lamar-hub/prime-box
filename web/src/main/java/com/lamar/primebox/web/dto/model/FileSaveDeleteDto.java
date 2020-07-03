@@ -9,9 +9,9 @@ import lombok.experimental.Accessors;
 @Setter
 @ToString
 @Accessors(chain = true)
-public class FileSaveDto {
+public class FileSaveDeleteDto {
 
-    private String fileID;
+    private String fileId;
     private String filename;
     private String type;
     private long size;

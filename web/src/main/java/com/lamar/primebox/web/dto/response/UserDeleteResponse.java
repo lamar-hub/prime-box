@@ -11,11 +11,11 @@ import java.io.Serializable;
 @ToString
 public class UserDeleteResponse implements Serializable {
 
-    private String userID;
+    private String userId;
     private String email;
     private String name;
     private String surname;
     private long stored;
     private long limit;
-    
+
 }

@@ -13,5 +13,5 @@ public class SharedFileShareDto {
     private String sharedUserUsername;
     private long sharedTime;
     private String message;
-    
+
 }

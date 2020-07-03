@@ -9,7 +9,7 @@ import lombok.ToString;
 @ToString
 public class SharedFileUnshareResponse {
 
-    private String sharedFileFileID;
+    private String sharedFileFileId;
     private String sharedFileFilename;
     private long sharedFileSize;
     private long sharedFileLastModified;
@@ -18,5 +18,5 @@ public class SharedFileUnshareResponse {
     private String sharedFileUserSurname;
     private String message;
     private long date;
-    
+
 }

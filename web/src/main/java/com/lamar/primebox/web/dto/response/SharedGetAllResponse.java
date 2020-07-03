@@ -14,6 +14,6 @@ import java.util.List;
 @Accessors(chain = true)
 public class SharedGetAllResponse {
 
-    private List<SharedFileDto> shareds;
+    private List<SharedFileDto> sharedFiles;
 
 }

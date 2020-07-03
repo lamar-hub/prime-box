@@ -2,7 +2,7 @@ package com.lamar.primebox.web.service.impl;
 
 import com.lamar.primebox.web.dto.model.FileDownloadDto;
 import com.lamar.primebox.web.dto.model.FileDto;
-import com.lamar.primebox.web.dto.model.FileSaveDto;
+import com.lamar.primebox.web.dto.model.FileSaveDeleteDto;
 import com.lamar.primebox.web.dto.model.FileUpdateDto;
 import com.lamar.primebox.web.model.File;
 import com.lamar.primebox.web.model.User;
@@ -42,35 +42,50 @@ public class FileServiceImpl implements FileService {
     @Override
     @Transactional
     public List<FileDto> getAllUserFiles(String username) {
-        List<File> files = fileDao.getAllUserFiles(username);
+        final List<File> files = fileDao.getAllUserFiles(username);
         return files.stream().map(file -> modelMapper.map(file, FileDto.class)).collect(Collectors.toList());
     }
 
     @Override
     @Transactional
-    public FileSaveDto saveFileDatabase(MultipartFile multipartFile, String username) throws Exception {
-        File file = new File(multipartFile.getOriginalFilename(), multipartFile.getContentType(), (int) multipartFile.getSize(), new Date().getTime());
-        User user = userDao.getUser(username);
-        if (user.getStored() + file.getSize() > user.getLimit()) {
+    public FileSaveDeleteDto saveFileDatabase(MultipartFile multipartFile, String username) throws Exception {
+        final User user = userDao.getUser(username);
+
+        if (!hasSpace(user, multipartFile.getSize())) {
             throw new Exception("There are no space anymore!");
         }
-        file.setUser(user);
+
+        final File file = new File()
+                .setFilename(multipartFile.getOriginalFilename())
+                .setType(multipartFile.getContentType())
+                .setSize((int) multipartFile.getSize())
+                .setLastModified(new Date().getTime())
+                .setUser(user);
+
         fileDao.saveFile(file);
+
         saveFileDisk(multipartFile, file);
+
         user.setStored(user.getStored() + file.getSize());
-        modelMapper.map(file, FileSaveDto.class).setUserStored(user.getStored());
-        return modelMapper.map(file, FileSaveDto.class).setUserStored(user.getStored());
+        return modelMapper.map(file, FileSaveDeleteDto.class).setUserStored(user.getStored());
+    }
+
+    private boolean hasSpace(User user, Long size) {
+        if (user.getStored() + size > user.getLimit()) {
+            return false;
+        }
+        return true;
     }
 
     private void saveFileDisk(MultipartFile multipartFile, File file) throws IOException {
-        Path filePath = Path.of(storageProperties.getPath(), file.getFileId());
+        final Path filePath = Path.of(storageProperties.getPath(), file.getFileId());
         Files.copy(multipartFile.getInputStream(), filePath);
     }
 
     @Override
     @Transactional
     public FileDto updateFile(FileUpdateDto fileUpdateDto) throws Exception {
-        File file = fileDao.getFile(fileUpdateDto.getFileID());
+        final File file = fileDao.getFile(fileUpdateDto.getFileId());
         if (file != null) {
             file.setFilename(fileUpdateDto.getFilename());
             return modelMapper.map(file, FileDto.class);
@@ -81,33 +96,35 @@ public class FileServiceImpl implements FileService {
     @Override
     @Transactional
     public FileDownloadDto getFile(String fileID) throws Exception {
-        File file = fileDao.getFile(fileID);
+        final File file = fileDao.getFile(fileID);
         if (file != null) {
-            return modelMapper.map(file, FileDownloadDto.class).setFile(getFileFromDisk(file.getFileId()));
+            final byte[] fileFromDisk = getFileFromDisk(file.getFileId());
+            return modelMapper.map(file, FileDownloadDto.class).setFile(fileFromDisk);
         }
         throw new Exception("Exception! File doesn't exist!");
     }
 
     private byte[] getFileFromDisk(String fileId) throws IOException {
-        Path filePath = Path.of(storageProperties.getPath(), fileId);
+        final Path filePath = Path.of(storageProperties.getPath(), fileId);
         return Files.readAllBytes(filePath);
     }
 
     @Override
     @Transactional
-    public FileSaveDto deleteFile(String userId) throws Exception {
-        File file = fileDao.getFile(userId);
+    public FileSaveDeleteDto deleteFile(String userId) throws Exception {
+        final File file = fileDao.getFile(userId);
         if (file != null) {
-            file.getUser().setStored(file.getUser().getStored() - file.getSize());
             fileDao.deleteFile(file);
+            file.getUser().setStored(file.getUser().getStored() - file.getSize());
+
             deleteFileFromDisk(file.getFileId());
-            return modelMapper.map(file, FileSaveDto.class).setUserStored(file.getUser().getStored());
+            return modelMapper.map(file, FileSaveDeleteDto.class).setUserStored(file.getUser().getStored());
         }
         throw new Exception("Exception! File doesn't exist!");
     }
 
     private void deleteFileFromDisk(String fileId) throws IOException {
-        Path filePath = Path.of(storageProperties.getPath(), fileId);
+        final Path filePath = Path.of(storageProperties.getPath(), fileId);
         Files.delete(filePath);
     }
 

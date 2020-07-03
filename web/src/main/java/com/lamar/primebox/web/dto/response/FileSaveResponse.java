@@ -9,11 +9,11 @@ import lombok.ToString;
 @ToString
 public class FileSaveResponse {
 
-    private String fileID;
+    private String fileId;
     private String filename;
     private String type;
     private long size;
     private long lastModified;
     private long userStored;
-    
+
 }

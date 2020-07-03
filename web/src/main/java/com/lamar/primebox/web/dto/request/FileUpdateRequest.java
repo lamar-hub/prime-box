@@ -12,7 +12,7 @@ import javax.validation.constraints.NotBlank;
 public class FileUpdateRequest {
 
     @NotBlank
-    private String fileID;
+    private String fileId;
 
     @NotBlank
     private String filename;

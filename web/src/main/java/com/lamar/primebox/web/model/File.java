@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import lombok.experimental.Accessors;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
@@ -16,6 +17,7 @@ import javax.validation.constraints.Positive;
 @Setter
 @NoArgsConstructor
 @ToString
+@Accessors(chain = true)
 @Entity
 @Table(name = "file")
 public class File {

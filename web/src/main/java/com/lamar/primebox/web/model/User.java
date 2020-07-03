@@ -30,7 +30,7 @@ public class User implements UserDetails {
     @GeneratedValue(generator = "uuid2", strategy = GenerationType.AUTO)
     @GenericGenerator(name = "uuid2", strategy = "uuid2")
     @Column(name = "user_id")
-    private String userID;
+    private String userId;
 
     @Email
     @Column(name = "email")

@@ -14,7 +14,7 @@ import java.util.List;
 @ToString
 @Accessors(chain = true)
 public class FileGetAllResponse implements Serializable {
-    
+
     private List<FileDto> files;
-    
+
 }

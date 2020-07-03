@@ -12,7 +12,7 @@ import java.io.Serializable;
 @ToString
 @Accessors(chain = true)
 public class UserLogInResponse implements Serializable {
-    
+
     private String jwtToken;
-    
+
 }

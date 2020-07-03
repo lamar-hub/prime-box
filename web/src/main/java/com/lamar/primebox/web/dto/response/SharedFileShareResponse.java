@@ -18,5 +18,5 @@ public class SharedFileShareResponse {
     private String sharedUserSurname;
     private String message;
     private long date;
-    
+
 }

@@ -3,6 +3,7 @@ package com.lamar.primebox.web.dto.request;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import lombok.experimental.Accessors;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
@@ -12,6 +13,7 @@ import java.io.Serializable;
 @Getter
 @Setter
 @ToString
+@Accessors(chain = true)
 public class UserSignUpRequest implements Serializable {
 
     @Email

@@ -15,5 +15,5 @@ public class UserBasicDto {
     private String password;
     private String name;
     private String surname;
-    
+
 }

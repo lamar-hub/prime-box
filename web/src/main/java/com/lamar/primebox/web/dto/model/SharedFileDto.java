@@ -9,7 +9,7 @@ import lombok.ToString;
 @ToString
 public class SharedFileDto {
 
-    private String sharedFileFileID;
+    private String sharedFileFileId;
     private String sharedFileFilename;
     private long sharedFileSize;
     private long sharedFileLastModified;

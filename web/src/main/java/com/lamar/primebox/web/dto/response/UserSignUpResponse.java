@@ -13,11 +13,11 @@ import java.io.Serializable;
 @Accessors(chain = true)
 public class UserSignUpResponse implements Serializable {
 
-    private String userID;
+    private String userId;
     private String email;
     private String name;
     private String surname;
     private long stored;
     private long limit;
-    
+
 }

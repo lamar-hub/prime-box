@@ -32,22 +32,22 @@ public class UserController {
 
     @PatchMapping("")
     public ResponseEntity<?> updateUser(@RequestBody @Valid UserUpdateRequest updateRequest) throws Exception {
-        UserBasicDto userBasicDto = modelMapper.map(updateRequest, UserBasicDto.class);
-        userBasicDto.setUsername(getUsernameFromSecurityContext());
-        UserDto userDto = this.userService.updateUser(userBasicDto);
-        UserUpdateResponse updateResponse = modelMapper.map(userDto, UserUpdateResponse.class);
+        final UserBasicDto userBasicDto = modelMapper.map(updateRequest, UserBasicDto.class)
+                .setUsername(getUsernameFromSecurityContext());
+        final UserDto userDto = this.userService.updateUser(userBasicDto);
+        final UserUpdateResponse updateResponse = modelMapper.map(userDto, UserUpdateResponse.class);
         return ResponseEntity.ok(updateResponse);
     }
 
     @DeleteMapping("")
     public ResponseEntity<?> deactivateUser() throws Exception {
-        UserDto userDto = userService.deactivateUser(getUsernameFromSecurityContext());
-        UserDeleteResponse userDeleteResponse = modelMapper.map(userDto, UserDeleteResponse.class);
+        final UserDto userDto = userService.deactivateUser(getUsernameFromSecurityContext());
+        final UserDeleteResponse userDeleteResponse = modelMapper.map(userDto, UserDeleteResponse.class);
         return ResponseEntity.ok(userDeleteResponse);
     }
 
     private String getUsernameFromSecurityContext() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         return (String) authentication.getPrincipal();
     }
 

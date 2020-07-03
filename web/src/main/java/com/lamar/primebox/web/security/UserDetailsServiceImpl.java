@@ -14,8 +14,8 @@ import java.util.ArrayList;
 @Service
 @Slf4j
 public class UserDetailsServiceImpl implements UserDetailsService {
-    
-    private UserService userService;
+
+    private final UserService userService;
 
     public UserDetailsServiceImpl(UserService userService) {
         this.userService = userService;
@@ -24,7 +24,10 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         try {
-            UserDto userDto = userService.getUser(username);
+            final UserDto userDto = userService.getUser(username);
+            if (userDto == null) {
+                throw new Exception();
+            }
             return new User(userDto.getEmail(), userDto.getPassword(), new ArrayList<>());
         } catch (Exception e) {
             throw new UsernameNotFoundException("User was not found!");

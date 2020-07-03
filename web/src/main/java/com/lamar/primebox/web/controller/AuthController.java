@@ -32,18 +32,18 @@ public class AuthController {
 
     @PostMapping("/sign-up")
     public ResponseEntity<UserSignUpResponse> addUser(@RequestBody @Valid UserSignUpRequest signUpRequest) throws Exception {
-        UserBasicDto userBasicDto = modelMapper.map(signUpRequest, UserBasicDto.class);
-        UserDto userDto = userService.addUser(userBasicDto);
-        UserSignUpResponse signUpResponse = modelMapper.map(userDto, UserSignUpResponse.class);
+        final UserBasicDto userBasicDto = modelMapper.map(signUpRequest, UserBasicDto.class);
+        final UserDto userDto = userService.addUser(userBasicDto);
+        final UserSignUpResponse signUpResponse = modelMapper.map(userDto, UserSignUpResponse.class);
         return ResponseEntity.ok(signUpResponse);
     }
 
     @PostMapping("/log-in")
     public ResponseEntity<?> createAuthenticationToken(@RequestBody @Valid UserLogInRequest logInRequest) throws Exception {
-        UserCredentialsDto userCredentialsDto = modelMapper.map(logInRequest, UserCredentialsDto.class);
-        UserJwtDto userJwtDto = userService.authenticateUser(userCredentialsDto);
-        UserLogInResponse logInResponse = modelMapper.map(userJwtDto, UserLogInResponse.class);
+        final UserCredentialsDto userCredentialsDto = modelMapper.map(logInRequest, UserCredentialsDto.class);
+        final UserJwtDto userJwtDto = userService.authenticateUser(userCredentialsDto);
+        final UserLogInResponse logInResponse = modelMapper.map(userJwtDto, UserLogInResponse.class);
         return ResponseEntity.ok(logInResponse);
     }
-    
+
 }

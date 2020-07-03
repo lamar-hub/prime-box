@@ -11,7 +11,7 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 public class FileUpdateDto {
 
-    private String fileID;
+    private String fileId;
     private String filename;
-    
+
 }

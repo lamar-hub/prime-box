@@ -36,28 +36,28 @@ public class SharedFileController {
 
     @GetMapping("")
     public ResponseEntity<?> getAllUserSharedFiles() {
-        List<SharedFileDto> sharedFileDtoList = sharedService.getAllUserSharedFiles(getUsernameFromSecurityContext());
-        SharedGetAllResponse sharedGetAllResponse = modelMapper.map(sharedFileDtoList, SharedGetAllResponse.class);
+        final List<SharedFileDto> sharedFileDtoList = sharedService.getAllUserSharedFiles(getUsernameFromSecurityContext());
+        final SharedGetAllResponse sharedGetAllResponse = new SharedGetAllResponse().setSharedFiles(sharedFileDtoList);
         return ResponseEntity.ok(sharedGetAllResponse);
     }
 
     @PostMapping("")
     public ResponseEntity<?> shareFile(@RequestBody @Valid SharedFileShareRequest sharedFileShareRequest) throws Exception {
-        SharedFileShareDto sharedFileShareDto = modelMapper.map(sharedFileShareRequest, SharedFileShareDto.class);
-        SharedFileDto sharedFileDto = sharedService.share(sharedFileShareDto);
-        SharedFileShareResponse shareResponse = modelMapper.map(sharedFileDto, SharedFileShareResponse.class);
+        final SharedFileShareDto sharedFileShareDto = modelMapper.map(sharedFileShareRequest, SharedFileShareDto.class);
+        final SharedFileDto sharedFileDto = sharedService.share(sharedFileShareDto);
+        final SharedFileShareResponse shareResponse = modelMapper.map(sharedFileDto, SharedFileShareResponse.class);
         return ResponseEntity.ok(shareResponse);
     }
 
     @DeleteMapping("/{fileId}")
     public ResponseEntity<?> unshareFile(@PathVariable @NotBlank String fileId) throws Exception {
-        SharedFileDto sharedFileDto = sharedService.unshare(new SharedFileUnshareDto().setFileId(fileId).setUsername(getUsernameFromSecurityContext()));
-        SharedFileUnshareResponse sharedFileUnshareResponse = modelMapper.map(sharedFileDto, SharedFileUnshareResponse.class);
+        final SharedFileDto sharedFileDto = sharedService.unshare(new SharedFileUnshareDto().setFileId(fileId).setUsername(getUsernameFromSecurityContext()));
+        final SharedFileUnshareResponse sharedFileUnshareResponse = modelMapper.map(sharedFileDto, SharedFileUnshareResponse.class);
         return ResponseEntity.ok(sharedFileUnshareResponse);
     }
 
     private String getUsernameFromSecurityContext() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         return (String) authentication.getPrincipal();
     }
 

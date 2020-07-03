@@ -11,11 +11,11 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 public class UserUpdateResponse {
 
-    private String userID;
+    private String userId;
     private String email;
     private String name;
     private String surname;
     private long stored;
     private long limit;
-    
+
 }

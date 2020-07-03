@@ -10,8 +10,8 @@ import lombok.experimental.Accessors;
 @ToString
 @Accessors(chain = true)
 public class UserCredentialsDto {
-    
+
     private String username;
     private String password;
-    
+
 }

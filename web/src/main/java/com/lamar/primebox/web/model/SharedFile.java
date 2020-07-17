@@ -9,6 +9,7 @@ import lombok.experimental.Accessors;
 import javax.persistence.*;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import java.io.Serializable;
 import java.util.Date;
 
 @Getter
@@ -18,7 +19,7 @@ import java.util.Date;
 @Accessors(chain = true)
 @Entity
 @Table(name = "shared")
-public class SharedFile {
+public class SharedFile implements Serializable {
 
     @Valid
     @Id

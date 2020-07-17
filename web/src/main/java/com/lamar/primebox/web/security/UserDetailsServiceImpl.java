@@ -1,15 +1,13 @@
 package com.lamar.primebox.web.security;
 
 import com.lamar.primebox.web.dto.model.UserDto;
+import com.lamar.primebox.web.model.User;
 import com.lamar.primebox.web.service.UserService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-
-import java.util.ArrayList;
 
 @Service
 @Slf4j
@@ -28,7 +26,15 @@ public class UserDetailsServiceImpl implements UserDetailsService {
             if (userDto == null) {
                 throw new Exception();
             }
-            return new User(userDto.getEmail(), userDto.getPassword(), new ArrayList<>());
+            return new User()
+                    .setUserId(userDto.getUserId())
+                    .setEmail(userDto.getEmail())
+                    .setPassword(userDto.getPassword())
+                    .setName(userDto.getName())
+                    .setSurname(userDto.getSurname())
+                    .setStored(userDto.getStored())
+                    .setLimit(userDto.getLimit())
+                    .setActive(userDto.isActive());
         } catch (Exception e) {
             throw new UsernameNotFoundException("User was not found!");
         }

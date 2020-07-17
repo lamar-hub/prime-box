@@ -11,6 +11,7 @@ import com.lamar.primebox.web.util.CapacityUtil;
 import com.lamar.primebox.web.util.JwtUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -30,7 +31,11 @@ public class UserServiceImpl implements UserService {
     private final JwtUtil jwtUtil;
     private final CapacityUtil capacityUtil;
 
-    public UserServiceImpl(AuthenticationManager authenticationManager, UserDao userDao, PasswordEncoder passwordEncoder, ModelMapper modelMapper, JwtUtil jwtUtil, CapacityUtil capacityUtil) {
+    public UserServiceImpl(@Lazy AuthenticationManager authenticationManager,
+                           UserDao userDao, PasswordEncoder passwordEncoder,
+                           ModelMapper modelMapper,
+                           JwtUtil jwtUtil,
+                           CapacityUtil capacityUtil) {
         this.authenticationManager = authenticationManager;
         this.userDao = userDao;
         this.passwordEncoder = passwordEncoder;
@@ -99,7 +104,7 @@ public class UserServiceImpl implements UserService {
     public UserDto deactivateUser(String username) throws Exception {
         final User user = userDao.getByUsername(username);
         if (user != null) {
-            //TODO Deactivate user
+            user.setActive(false);
             return modelMapper.map(user, UserDto.class);
         }
         throw new Exception("Exception! User was not deactivated!");

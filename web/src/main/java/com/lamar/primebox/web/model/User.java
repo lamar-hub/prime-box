@@ -1,9 +1,6 @@
 package com.lamar.primebox.web.model;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 import lombok.experimental.Accessors;
 import org.hibernate.annotations.GenericGenerator;
 import org.springframework.security.core.GrantedAuthority;
@@ -20,7 +17,7 @@ import java.util.Collection;
 @NoArgsConstructor
 @Accessors(chain = true)
 @Entity
-@Table(name = "user")
+@Table(name = "user_credentials")
 public class User implements UserDetails {
 
     private static final long serialVersionUID = 4832588063114528104L;
@@ -36,7 +33,6 @@ public class User implements UserDetails {
     @Column(name = "email")
     private String email;
 
-    @Size(min = 6, max = 20)
     @NotBlank
     @Column(name = "password")
     private String password;
@@ -58,6 +54,10 @@ public class User implements UserDetails {
     @NotNull
     @Column(name = "capacity")
     private long limit;
+    
+    @NotNull
+    @Column(name = "active")
+    private boolean active;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -86,7 +86,7 @@ public class User implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return true;
+        return active;
     }
 
 }

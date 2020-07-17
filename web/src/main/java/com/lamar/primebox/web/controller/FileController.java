@@ -9,6 +9,7 @@ import com.lamar.primebox.web.dto.response.FileDeleteResponse;
 import com.lamar.primebox.web.dto.response.FileGetAllResponse;
 import com.lamar.primebox.web.dto.response.FileSaveResponse;
 import com.lamar.primebox.web.dto.response.FileUpdateResponse;
+import com.lamar.primebox.web.model.User;
 import com.lamar.primebox.web.service.FileService;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -84,8 +85,9 @@ public class FileController {
     }
 
     private String getUsernameFromSecurityContext() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        return (String) authentication.getPrincipal();
+        final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        final User user = (User) authentication.getPrincipal();
+        return user.getUsername();
     }
 
 }

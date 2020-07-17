@@ -5,6 +5,7 @@ import com.lamar.primebox.web.dto.model.UserDto;
 import com.lamar.primebox.web.dto.request.UserUpdateRequest;
 import com.lamar.primebox.web.dto.response.UserDeleteResponse;
 import com.lamar.primebox.web.dto.response.UserUpdateResponse;
+import com.lamar.primebox.web.model.User;
 import com.lamar.primebox.web.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -48,7 +49,8 @@ public class UserController {
 
     private String getUsernameFromSecurityContext() {
         final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        return (String) authentication.getPrincipal();
+        final User user = (User) authentication.getPrincipal();
+        return user.getUsername();
     }
 
 }

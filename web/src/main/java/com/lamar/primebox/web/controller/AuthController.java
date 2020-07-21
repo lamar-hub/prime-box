@@ -1,9 +1,9 @@
 package com.lamar.primebox.web.controller;
 
+import com.lamar.primebox.web.dto.model.UserAndJwtDto;
 import com.lamar.primebox.web.dto.model.UserBasicDto;
 import com.lamar.primebox.web.dto.model.UserCredentialsDto;
 import com.lamar.primebox.web.dto.model.UserDto;
-import com.lamar.primebox.web.dto.model.UserJwtDto;
 import com.lamar.primebox.web.dto.request.UserLogInRequest;
 import com.lamar.primebox.web.dto.request.UserSignUpRequest;
 import com.lamar.primebox.web.dto.response.UserLogInResponse;
@@ -41,8 +41,8 @@ public class AuthController {
     @PostMapping("/log-in")
     public ResponseEntity<?> createAuthenticationToken(@RequestBody @Valid UserLogInRequest logInRequest) throws Exception {
         final UserCredentialsDto userCredentialsDto = modelMapper.map(logInRequest, UserCredentialsDto.class);
-        final UserJwtDto userJwtDto = userService.authenticateUser(userCredentialsDto);
-        final UserLogInResponse logInResponse = modelMapper.map(userJwtDto, UserLogInResponse.class);
+        final UserAndJwtDto userAndJwtDto = userService.authenticateUser(userCredentialsDto);
+        final UserLogInResponse logInResponse = modelMapper.map(userAndJwtDto, UserLogInResponse.class);
         return ResponseEntity.ok(logInResponse);
     }
 

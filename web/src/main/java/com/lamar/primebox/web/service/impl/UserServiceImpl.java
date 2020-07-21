@@ -1,9 +1,9 @@
 package com.lamar.primebox.web.service.impl;
 
+import com.lamar.primebox.web.dto.model.UserAndJwtDto;
 import com.lamar.primebox.web.dto.model.UserBasicDto;
 import com.lamar.primebox.web.dto.model.UserCredentialsDto;
 import com.lamar.primebox.web.dto.model.UserDto;
-import com.lamar.primebox.web.dto.model.UserJwtDto;
 import com.lamar.primebox.web.model.User;
 import com.lamar.primebox.web.repo.UserDao;
 import com.lamar.primebox.web.service.UserService;
@@ -71,12 +71,12 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public UserJwtDto authenticateUser(UserCredentialsDto userCredentialsDto) throws Exception {
+    public UserAndJwtDto authenticateUser(UserCredentialsDto userCredentialsDto) throws Exception {
         authenticate(userCredentialsDto.getUsername(), userCredentialsDto.getPassword());
         final User user = userDao.getByUsername(userCredentialsDto.getUsername());
         if (user != null) {
             final String jwtToken = jwtUtil.generateToken(user.getUserId(), user.getUsername());
-            return new UserJwtDto().setJwtToken(jwtToken);
+            return modelMapper.map(user, UserAndJwtDto.class).setJwtToken(jwtToken);
         }
         throw new Exception("Exception! User was not authenticated!");
     }

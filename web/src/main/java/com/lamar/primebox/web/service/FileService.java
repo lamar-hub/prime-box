@@ -12,7 +12,7 @@ public interface FileService {
 
     List<FileDto> getAllUserFiles(String username);
 
-    FileSaveDeleteDto saveFileDatabase(MultipartFile multipartFile, String username) throws Exception;
+    FileSaveDeleteDto saveFile(MultipartFile multipartFile, String username) throws Exception;
 
     FileDto updateFile(FileUpdateDto fileUpdateDto) throws Exception;
 

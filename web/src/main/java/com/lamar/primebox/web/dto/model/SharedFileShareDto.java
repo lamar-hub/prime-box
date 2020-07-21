@@ -11,7 +11,6 @@ public class SharedFileShareDto {
 
     private String fileId;
     private String sharedUserUsername;
-    private long sharedTime;
     private String message;
 
 }

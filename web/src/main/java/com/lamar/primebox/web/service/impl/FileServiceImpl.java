@@ -48,8 +48,12 @@ public class FileServiceImpl implements FileService {
 
     @Override
     @Transactional
-    public FileSaveDeleteDto saveFileDatabase(MultipartFile multipartFile, String username) throws Exception {
-        final User user = userDao.getUser(username);
+    public FileSaveDeleteDto saveFile(MultipartFile multipartFile, String username) throws Exception {
+        final User user = userDao.getByUsername(username);
+
+        if (user == null) {
+            throw new Exception("Exception! User does not exist");
+        }
 
         if (!hasSpace(user, multipartFile.getSize())) {
             throw new Exception("There are no space anymore!");
@@ -71,10 +75,7 @@ public class FileServiceImpl implements FileService {
     }
 
     private boolean hasSpace(User user, Long size) {
-        if (user.getStored() + size > user.getLimit()) {
-            return false;
-        }
-        return true;
+        return user.getStored() + size <= user.getLimit();
     }
 
     private void saveFileDisk(MultipartFile multipartFile, File file) throws IOException {

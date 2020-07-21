@@ -51,7 +51,7 @@ public class FileController {
 
     @PostMapping("")
     public ResponseEntity<?> saveFile(@RequestParam("file") @NotNull MultipartFile multipartFile) throws Exception {
-        final FileSaveDeleteDto fileSaveDeleteDto = fileService.saveFileDatabase(multipartFile, getUsernameFromSecurityContext());
+        final FileSaveDeleteDto fileSaveDeleteDto = fileService.saveFile(multipartFile, getUsernameFromSecurityContext());
         final FileSaveResponse saveResponse = modelMapper.map(fileSaveDeleteDto, FileSaveResponse.class);
         return ResponseEntity.ok(saveResponse);
     }

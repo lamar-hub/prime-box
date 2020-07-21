@@ -16,6 +16,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -41,7 +42,7 @@ public class SharedServiceImpl implements SharedFileService {
     @Transactional
     public List<SharedFileDto> getAllUserSharedFiles(String username) {
         final List<SharedFile> sharedFileList = sharedFileDao.getAllSharedFiles(username);
-        
+
         return sharedFileList.stream().map(sharedFile -> modelMapper.map(sharedFile, SharedFileDto.class)).collect(Collectors.toList());
     }
 
@@ -51,17 +52,26 @@ public class SharedServiceImpl implements SharedFileService {
         final File file = fileDao.getFile(sharedFileShareDto.getFileId());
         final User user = userDao.getByUsername(sharedFileShareDto.getSharedUserUsername());
 
-        if (file != null && user != null) {
-            final SharedFile sharedFile = new SharedFile()
-                    .setSharedFile(file)
-                    .setSharedUser(user)
-                    .setDate(sharedFileShareDto.getSharedTime())
-                    .setMessage(sharedFileShareDto.getMessage());
-
-            sharedFileDao.saveSharedFile(sharedFile);
-            return modelMapper.map(sharedFile, SharedFileDto.class);
+        if (user == null) {
+            throw new Exception("Exception! There is no such user!");
         }
-        throw new Exception("Exception! File is not shared.");
+
+        if (!user.isEnabled()) {
+            throw new Exception("Exception! Shared user is not active!");
+        }
+
+        if (file == null) {
+            throw new Exception("Exception! There is no such file!");
+        }
+
+        final SharedFile sharedFile = new SharedFile()
+                .setSharedFile(file)
+                .setSharedUser(user)
+                .setDate(new Date().getTime())
+                .setMessage(sharedFileShareDto.getMessage());
+
+        sharedFileDao.saveSharedFile(sharedFile);
+        return modelMapper.map(sharedFile, SharedFileDto.class);
     }
 
     @Override
@@ -69,11 +79,12 @@ public class SharedServiceImpl implements SharedFileService {
     public SharedFileDto unshare(SharedFileUnshareDto sharedFileUnshareDto) throws Exception {
         final SharedFile sharedFile = sharedFileDao.getSharedFile(sharedFileUnshareDto.getFileId(), sharedFileUnshareDto.getUsername());
 
-        if (sharedFile != null) {
-            sharedFileDao.deleteSharedFile(sharedFile);
-            return modelMapper.map(sharedFile, SharedFileDto.class);
+        if (sharedFile == null) {
+            throw new Exception("Exception! Shared file does not exist.");
         }
-        throw new Exception("Exception! File is not shared.");
+
+        sharedFileDao.deleteSharedFile(sharedFile);
+        return modelMapper.map(sharedFile, SharedFileDto.class);
     }
 
 }

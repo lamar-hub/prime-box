@@ -5,7 +5,6 @@ import lombok.Setter;
 import lombok.ToString;
 
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 
 @Getter
 @Setter
@@ -17,9 +16,6 @@ public class SharedFileShareRequest {
 
     @NotBlank
     private String sharedUserUsername;
-
-    @NotNull
-    private long sharedTime;
 
     private String message;
 

@@ -92,7 +92,8 @@ public class UserServiceImpl implements UserService {
     public UserDto updateUser(UserBasicDto userBasicDto) throws Exception {
         final User user = userDao.getByUsername(userBasicDto.getUsername());
         if (user != null) {
-            user.setName(userBasicDto.getName())
+            user.setPassword(passwordEncoder.encode(userBasicDto.getPassword()))
+                    .setName(userBasicDto.getName())
                     .setSurname(userBasicDto.getSurname());
             return modelMapper.map(user, UserDto.class);
         }

@@ -51,11 +51,4 @@ public class File {
     @JoinColumn(name = "user_id")
     private User user;
 
-    public File(String filename, String type, int size, long lastModified) {
-        this.filename = filename;
-        this.type = type;
-        this.size = size;
-        this.lastModified = lastModified;
-    }
-
 }

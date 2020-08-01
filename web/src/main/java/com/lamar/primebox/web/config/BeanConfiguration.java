@@ -16,7 +16,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 public class BeanConfiguration {
 
     @Bean
-    public ModelMapper defaultMapper() {
+    public ModelMapper modelMapper() {
         final ModelMapper mapper = new ModelMapper();
         mapper.typeMap(UserSignUpRequest.class, UserBasicDto.class).addMapping(UserSignUpRequest::getEmail, UserBasicDto::setUsername);
         mapper.typeMap(UserLogInRequest.class, UserCredentialsDto.class).addMapping(UserLogInRequest::getEmail, UserCredentialsDto::setUsername);

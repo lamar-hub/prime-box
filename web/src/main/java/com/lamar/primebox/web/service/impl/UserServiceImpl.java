@@ -1,8 +1,8 @@
 package com.lamar.primebox.web.service.impl;
 
-import com.lamar.primebox.email.dto.SendNotificationDto;
-import com.lamar.primebox.email.manager.NotificationManager;
-import com.lamar.primebox.email.model.NotificationType;
+import com.lamar.primebox.notification.dto.SendNotificationDto;
+import com.lamar.primebox.notification.manager.NotificationManager;
+import com.lamar.primebox.notification.model.NotificationType;
 import com.lamar.primebox.web.dto.model.UserAndJwtDto;
 import com.lamar.primebox.web.dto.model.UserBasicDto;
 import com.lamar.primebox.web.dto.model.UserCredentialsDto;

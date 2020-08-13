@@ -1,10 +1,10 @@
 package com.lamar.primebox.notification.controller;
 
-import com.lamar.primebox.notification.dto.SendGridWebhookDto;
+import com.lamar.primebox.notification.dto.NotificationWebhookDto;
 import com.lamar.primebox.notification.dto.request.SendGridWebhookRequest;
 import com.lamar.primebox.notification.manager.NotificationManager;
+import com.lamar.primebox.notification.model.NotificationState;
 import lombok.extern.slf4j.Slf4j;
-import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,27 +18,45 @@ import javax.validation.Valid;
 public class SendGridWebhookController {
 
     private final NotificationManager notificationManager;
-    private final ModelMapper modelMapper;
 
-    public SendGridWebhookController(NotificationManager notificationManager, ModelMapper modelMapper) {
+    public SendGridWebhookController(NotificationManager notificationManager) {
         this.notificationManager = notificationManager;
-        this.modelMapper = modelMapper;
     }
 
     @PostMapping
     public ResponseEntity<?> webhook(@RequestBody @Valid SendGridWebhookRequest sendGridWebhookRequest) {
-        log.info("sendGridWebhookRequest: " + sendGridWebhookRequest);
-
-        final SendGridWebhookDto sendGridWebhookDto = modelMapper.map(sendGridWebhookRequest, SendGridWebhookDto.class);
+        final NotificationWebhookDto notificationWebhookDto = mapToNotificationWebhookDto(sendGridWebhookRequest);
 
         try {
-            notificationManager.submitNotification(sendGridWebhookDto);
+            notificationManager.submitNotification(notificationWebhookDto);
         } catch (Exception e) {
-            log.error("submit error", e);
+            log.error("sendgrid submit error", e);
             return ResponseEntity.unprocessableEntity().build();
         }
 
         return ResponseEntity.ok().build();
+    }
+
+    private NotificationWebhookDto mapToNotificationWebhookDto(SendGridWebhookRequest sendGridWebhookRequest) {
+        final String transactionId = sendGridWebhookRequest.getSgMessageId().split("\\.")[0];
+        final NotificationState notificationState;
+
+        switch (sendGridWebhookRequest.getEvent()) {
+            case "processed":
+                notificationState = NotificationState.PROCESSED;
+                break;
+            case "delivered":
+                notificationState = NotificationState.DELIVERED;
+                break;
+            default:
+                notificationState = NotificationState.ERROR;
+        }
+
+        return NotificationWebhookDto
+                .builder()
+                .notificationState(notificationState)
+                .transactionId(transactionId)
+                .build();
     }
 
 }

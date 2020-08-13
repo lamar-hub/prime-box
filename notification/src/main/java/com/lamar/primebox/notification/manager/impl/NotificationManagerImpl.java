@@ -1,7 +1,7 @@
 package com.lamar.primebox.notification.manager.impl;
 
 import com.lamar.primebox.notification.dto.NotificationDto;
-import com.lamar.primebox.notification.dto.SendGridWebhookDto;
+import com.lamar.primebox.notification.dto.NotificationWebhookDto;
 import com.lamar.primebox.notification.dto.SendNotificationDto;
 import com.lamar.primebox.notification.manager.NotificationManager;
 import com.lamar.primebox.notification.model.NotificationState;
@@ -13,7 +13,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import javax.transaction.Transactional;
 import javax.validation.ConstraintViolation;
 import javax.validation.ValidationException;
 import javax.validation.Validator;
@@ -82,7 +81,7 @@ public class NotificationManagerImpl implements NotificationManager {
                                 }
 
                             } catch (IOException ioException) {
-                                log.error("Error sending notification: ", ioException);
+                                log.error("error sending notification: ", ioException);
                                 notificationDto.setNotificationState(NotificationState.ERROR);
                             }
 
@@ -91,34 +90,9 @@ public class NotificationManagerImpl implements NotificationManager {
                 );
     }
 
-    @Transactional
     @Override
-    public void submitNotification(SendGridWebhookDto sendGridWebhookDto) {
-        final String[] split = sendGridWebhookDto.getSgMessageId().split("\\.");
-        final String transactionId = split[0];
-
-        if (transactionId == null) {
-            throw new RuntimeException("there is no id");
-        }
-
-        final NotificationDto notificationDto = notificationService.getNotificationByTransactionId(transactionId);
-
-        if (notificationDto == null) {
-            throw new RuntimeException("there is no notification");
-        }
-
-        switch (sendGridWebhookDto.getEvent()) {
-            case "processed":
-                notificationDto.setNotificationState(NotificationState.PROCESSED);
-                break;
-            case "delivered":
-                notificationDto.setNotificationState(NotificationState.DELIVERED);
-                break;
-            default:
-                notificationDto.setNotificationState(NotificationState.ERROR);
-        }
-
-        notificationService.updateNotification(notificationDto);
+    public void submitNotification(NotificationWebhookDto notificationWebhookDto) {
+        notificationService.updateWebhookNotification(notificationWebhookDto);
     }
 
 }

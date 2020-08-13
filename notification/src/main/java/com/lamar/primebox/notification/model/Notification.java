@@ -1,10 +1,8 @@
 package com.lamar.primebox.notification.model;
 
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import lombok.experimental.Accessors;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
@@ -16,9 +14,7 @@ import java.util.Map;
 
 @Getter
 @Setter
-@NoArgsConstructor
 @ToString
-@Accessors(chain = true)
 @Entity
 @Table(name = "notification")
 public class Notification {

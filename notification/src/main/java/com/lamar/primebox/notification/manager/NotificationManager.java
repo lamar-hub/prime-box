@@ -1,6 +1,6 @@
 package com.lamar.primebox.notification.manager;
 
-import com.lamar.primebox.notification.dto.SendGridWebhookDto;
+import com.lamar.primebox.notification.dto.NotificationWebhookDto;
 import com.lamar.primebox.notification.dto.SendNotificationDto;
 
 public interface NotificationManager {
@@ -9,6 +9,6 @@ public interface NotificationManager {
 
     void processNotification();
 
-    void submitNotification(SendGridWebhookDto sendGridWebhookDto);
+    void submitNotification(NotificationWebhookDto notificationWebhookDto);
 
 }

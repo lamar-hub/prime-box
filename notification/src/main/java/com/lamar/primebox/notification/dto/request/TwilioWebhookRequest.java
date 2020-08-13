@@ -5,17 +5,17 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotBlank;
 
 @Getter
 @Setter
 @ToString
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class SendGridWebhookRequest {
+public class TwilioWebhookRequest {
 
-    @NotEmpty
-    private String event;
-    @NotEmpty
-    private String sgMessageId;
+    @NotBlank
+    private String messageStatus;
+    @NotBlank
+    private String messageSid;
 
 }

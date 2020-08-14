@@ -16,11 +16,12 @@ public class GlobalControllerExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<?> handleException(Exception exception) {
+        log.error("exception handler", exception);
 
-        Map<String, Object> payload = new LinkedHashMap<>();
+        final Map<String, Object> payload = new LinkedHashMap<>();
+
         payload.put("timestamp", LocalDateTime.now());
         payload.put("message", exception.getMessage());
-
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(payload);
     }
 

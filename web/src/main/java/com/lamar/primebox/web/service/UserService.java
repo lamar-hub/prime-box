@@ -13,6 +13,8 @@ public interface UserService {
 
     UserAndJwtDto authenticateUser(UserCredentialsDto userCredentialsDto) throws Exception;
 
+    UserAndJwtDto authenticateVerificationCodeUser(UserCredentialsDto userCredentialsDto) throws Exception;
+
     UserDto updateUser(UserBasicDto userBasicDto) throws Exception;
 
     UserDto deactivateUser(String username) throws Exception;

@@ -12,7 +12,7 @@ import java.io.Serializable;
 @Getter
 @Setter
 @ToString
-public class UserSignUpRequest implements Serializable {
+public class UserLogInVerificationCodeRequest implements Serializable {
 
     @Email
     @NotBlank
@@ -22,10 +22,8 @@ public class UserSignUpRequest implements Serializable {
     @NotBlank
     private String password;
 
+    @Size(min = 4, max = 4)
     @NotBlank
-    private String name;
-
-    @NotBlank
-    private String surname;
+    private String verificationCode;
 
 }

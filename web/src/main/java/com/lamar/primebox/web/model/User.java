@@ -1,6 +1,9 @@
 package com.lamar.primebox.web.model;
 
-import lombok.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 import lombok.experimental.Accessors;
 import org.hibernate.annotations.GenericGenerator;
 import org.springframework.security.core.GrantedAuthority;
@@ -54,10 +57,18 @@ public class User implements UserDetails {
     @NotNull
     @Column(name = "capacity")
     private long limit;
-    
+
     @NotNull
     @Column(name = "active")
     private boolean active;
+
+    @NotNull
+    @Column(name = "two_factor_verification")
+    private boolean twoFactorVerification;
+
+    @NotNull
+    @Column(name = "verification_code")
+    private String verificationCode;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

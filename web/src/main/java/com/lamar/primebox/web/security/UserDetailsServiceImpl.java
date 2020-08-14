@@ -35,8 +35,9 @@ public class UserDetailsServiceImpl implements UserDetailsService {
                     .setStored(userDto.getStored())
                     .setLimit(userDto.getLimit())
                     .setActive(userDto.isActive());
-        } catch (Exception e) {
-            throw new UsernameNotFoundException("User was not found!");
+        } catch (Exception exception) {
+            log.error("user not found", exception);
+            throw new UsernameNotFoundException("user not found");
         }
     }
 }

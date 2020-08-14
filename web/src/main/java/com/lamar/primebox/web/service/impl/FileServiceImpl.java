@@ -43,6 +43,7 @@ public class FileServiceImpl implements FileService {
     @Transactional
     public List<FileDto> getAllUserFiles(String username) {
         final List<File> files = fileDao.getAllUserFiles(username);
+
         return files.stream().map(file -> modelMapper.map(file, FileDto.class)).collect(Collectors.toList());
     }
 
@@ -52,11 +53,17 @@ public class FileServiceImpl implements FileService {
         final User user = userDao.getByUsername(username);
 
         if (user == null) {
-            throw new Exception("Exception! User does not exist");
+            log.error("user not found");
+            throw new Exception("user not found");
         }
 
-        if (!hasSpace(user, multipartFile.getSize())) {
-            throw new Exception("There are no space anymore!");
+        final long storedBeforeSave = user.getStored();
+        final long userLimit = user.getLimit();
+        final long fileSize = multipartFile.getSize();
+
+        if (!hasSpace(storedBeforeSave, userLimit, fileSize)) {
+            log.error("user have no space anymore");
+            throw new Exception("user have no space anymore");
         }
 
         final File file = new File()
@@ -65,48 +72,60 @@ public class FileServiceImpl implements FileService {
                 .setSize((int) multipartFile.getSize())
                 .setLastModified(new Date().getTime())
                 .setUser(user);
-
         fileDao.saveFile(file);
 
-        saveFileDisk(multipartFile, file);
+        final long storedAfterSave = storedBeforeSave + file.getSize();
+        user.setStored(storedAfterSave);
 
-        user.setStored(user.getStored() + file.getSize());
-        return modelMapper.map(file, FileSaveDeleteDto.class).setUserStored(user.getStored());
+        final boolean sendNotification = sendNotification(storedBeforeSave, storedAfterSave, userLimit);
+
+        return modelMapper.map(file, FileSaveDeleteDto.class)
+                .setUserStored(user.getStored())
+                .setSendNotification(sendNotification);
     }
 
-    private boolean hasSpace(User user, Long size) {
-        return user.getStored() + size <= user.getLimit();
+    private boolean sendNotification(long storedBeforeSave, long storedAfterSave, long userLimit) {
+        final boolean under = storedBeforeSave < userLimit / 2;
+        final boolean over = storedAfterSave > userLimit / 2;
+
+        return under && over;
     }
 
-    private void saveFileDisk(MultipartFile multipartFile, File file) throws IOException {
-        final Path filePath = Path.of(storageProperties.getPath(), file.getFileId());
-        Files.copy(multipartFile.getInputStream(), filePath);
+    private boolean hasSpace(long storedBeforeSave, long userLimit, long fileSize) {
+        return storedBeforeSave + fileSize <= userLimit;
     }
 
     @Override
     @Transactional
     public FileDto updateFile(FileUpdateDto fileUpdateDto) throws Exception {
         final File file = fileDao.getFile(fileUpdateDto.getFileId());
-        if (file != null) {
-            file.setFilename(fileUpdateDto.getFilename());
-            return modelMapper.map(file, FileDto.class);
+
+        if (file == null) {
+            log.error("file not found");
+            throw new Exception("file not found");
         }
-        throw new Exception("Exception! File doesn't exist!");
+
+        file.setFilename(fileUpdateDto.getFilename());
+        return modelMapper.map(file, FileDto.class);
     }
 
     @Override
     @Transactional
     public FileDownloadDto getFile(String fileID) throws Exception {
         final File file = fileDao.getFile(fileID);
-        if (file != null) {
-            final byte[] fileFromDisk = getFileFromDisk(file.getFileId());
-            return modelMapper.map(file, FileDownloadDto.class).setFile(fileFromDisk);
+
+        if (file == null) {
+            log.error("file not found");
+            throw new Exception("file not found");
         }
-        throw new Exception("Exception! File doesn't exist!");
+
+        final byte[] fileFromDisk = getFileFromDisk(file.getFileId());
+        return modelMapper.map(file, FileDownloadDto.class).setFile(fileFromDisk);
     }
 
     private byte[] getFileFromDisk(String fileId) throws IOException {
         final Path filePath = Path.of(storageProperties.getPath(), fileId);
+
         return Files.readAllBytes(filePath);
     }
 
@@ -114,19 +133,15 @@ public class FileServiceImpl implements FileService {
     @Transactional
     public FileSaveDeleteDto deleteFile(String userId) throws Exception {
         final File file = fileDao.getFile(userId);
-        if (file != null) {
-            fileDao.deleteFile(file);
-            file.getUser().setStored(file.getUser().getStored() - file.getSize());
 
-            deleteFileFromDisk(file.getFileId());
-            return modelMapper.map(file, FileSaveDeleteDto.class).setUserStored(file.getUser().getStored());
+        if (file == null) {
+            log.error("file not found");
+            throw new Exception("file not found");
         }
-        throw new Exception("Exception! File doesn't exist!");
-    }
 
-    private void deleteFileFromDisk(String fileId) throws IOException {
-        final Path filePath = Path.of(storageProperties.getPath(), fileId);
-        Files.delete(filePath);
+        fileDao.deleteFile(file);
+        file.getUser().setStored(file.getUser().getStored() - file.getSize());
+        return modelMapper.map(file, FileSaveDeleteDto.class).setUserStored(file.getUser().getStored());
     }
 
 }

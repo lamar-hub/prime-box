@@ -9,7 +9,7 @@ import java.io.Serializable;
 @Getter
 @Setter
 @ToString
-public class UserDeleteResponse implements Serializable {
+public class UserDeactivateResponse implements Serializable {
 
     private String userId;
     private String email;

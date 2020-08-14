@@ -1,5 +1,8 @@
 package com.lamar.primebox.web.controller;
 
+import com.lamar.primebox.notification.dto.SendNotificationDto;
+import com.lamar.primebox.notification.manager.NotificationManager;
+import com.lamar.primebox.notification.model.NotificationType;
 import com.lamar.primebox.web.dto.model.FileDownloadDto;
 import com.lamar.primebox.web.dto.model.FileDto;
 import com.lamar.primebox.web.dto.model.FileSaveDeleteDto;
@@ -11,6 +14,8 @@ import com.lamar.primebox.web.dto.response.FileSaveResponse;
 import com.lamar.primebox.web.dto.response.FileUpdateResponse;
 import com.lamar.primebox.web.model.User;
 import com.lamar.primebox.web.service.FileService;
+import com.lamar.primebox.web.util.StorageProperties;
+import com.lamar.primebox.web.util.StorageUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.core.io.ByteArrayResource;
@@ -25,7 +30,10 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @CrossOrigin(origins = "*",
@@ -35,32 +43,71 @@ import java.util.List;
 public class FileController {
 
     private final FileService fileService;
+    private final NotificationManager notificationManager;
     private final ModelMapper modelMapper;
+    private final StorageProperties storageProperties;
 
-    public FileController(FileService fileService, ModelMapper modelMapper) {
+    public FileController(FileService fileService, NotificationManager notificationManager, ModelMapper modelMapper, StorageProperties storageProperties) {
         this.fileService = fileService;
+        this.notificationManager = notificationManager;
         this.modelMapper = modelMapper;
+        this.storageProperties = storageProperties;
     }
 
-    @GetMapping("")
+    @GetMapping
     public ResponseEntity<?> getAllUserFiles() {
         final List<FileDto> fileDtoList = fileService.getAllUserFiles(getUsernameFromSecurityContext());
         final FileGetAllResponse getAllResponse = new FileGetAllResponse().setFiles(fileDtoList);
+
+        log.info(getAllResponse.toString());
         return ResponseEntity.ok(getAllResponse);
     }
 
-    @PostMapping("")
+    @PostMapping
     public ResponseEntity<?> saveFile(@RequestParam("file") @NotNull MultipartFile multipartFile) throws Exception {
         final FileSaveDeleteDto fileSaveDeleteDto = fileService.saveFile(multipartFile, getUsernameFromSecurityContext());
+
+        try {
+            StorageUtil.saveFileToDisk(multipartFile, fileSaveDeleteDto.getFileId(), storageProperties.getPath());
+        } catch (IOException ioException) {
+            log.error("file not saved to disk", ioException);
+            fileService.deleteFile(fileSaveDeleteDto.getFileId());
+        }
+
+        if (fileSaveDeleteDto.isSendNotification()) {
+            final SendNotificationDto sendNotificationDto = buildAlertNotification(fileSaveDeleteDto);
+            try {
+                notificationManager.queueNotification(sendNotificationDto);
+            } catch (Exception exception) {
+                log.error("notification error", exception);
+            }
+        }
+
         final FileSaveResponse saveResponse = modelMapper.map(fileSaveDeleteDto, FileSaveResponse.class);
+
+        log.info(saveResponse.toString());
         return ResponseEntity.ok(saveResponse);
     }
 
-    @PutMapping("")
+    private SendNotificationDto buildAlertNotification(FileSaveDeleteDto fileSaveDeleteDto) {
+        final Map<String, String> templateModel = new HashMap<>();
+
+        templateModel.put("used", "" + "50");
+        return SendNotificationDto
+                .builder()
+                .notificationTo(getUsernameFromSecurityContext())
+                .notificationType(NotificationType.EMAIL_ALERT)
+                .templateModel(templateModel)
+                .build();
+    }
+
+    @PutMapping
     public ResponseEntity<?> updateFilename(@RequestBody @Valid FileUpdateRequest fileUpdateRequest) throws Exception {
         final FileUpdateDto fileUpdateDto = modelMapper.map(fileUpdateRequest, FileUpdateDto.class);
         final FileDto fileDto = fileService.updateFile(fileUpdateDto);
         final FileUpdateResponse fileUpdateResponse = modelMapper.map(fileDto, FileUpdateResponse.class);
+
+        log.info(fileUpdateResponse.toString());
         return ResponseEntity.ok(fileUpdateResponse);
     }
 
@@ -68,6 +115,8 @@ public class FileController {
     public ResponseEntity<ByteArrayResource> getFile(@PathVariable @NotBlank String fileId) throws Exception {
         final FileDownloadDto fileDownloadDto = fileService.getFile(fileId);
         final ByteArrayResource resource = new ByteArrayResource(fileDownloadDto.getFile());
+
+        log.info(fileDownloadDto.toString());
         return ResponseEntity
                 .ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=\"" + fileDownloadDto.getFilename() + "\"")
@@ -80,13 +129,23 @@ public class FileController {
     @DeleteMapping("/{fileId}")
     public ResponseEntity<?> deleteFile(@PathVariable @NotBlank String fileId) throws Exception {
         final FileSaveDeleteDto fileSaveDeleteDto = fileService.deleteFile(fileId);
+
+        try {
+            StorageUtil.deleteFileFromDisk(fileSaveDeleteDto.getFileId(), storageProperties.getPath());
+        } catch (IOException ioException) {
+            log.error("file not deleted from disk", ioException);
+        }
+
         final FileDeleteResponse fileDeleteResponse = modelMapper.map(fileSaveDeleteDto, FileDeleteResponse.class);
+
+        log.info(fileDeleteResponse.toString());
         return ResponseEntity.ok(fileDeleteResponse);
     }
 
     private String getUsernameFromSecurityContext() {
         final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         final User user = (User) authentication.getPrincipal();
+
         return user.getUsername();
     }
 

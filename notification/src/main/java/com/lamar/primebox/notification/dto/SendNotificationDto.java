@@ -1,10 +1,10 @@
 package com.lamar.primebox.notification.dto;
 
 import com.lamar.primebox.notification.model.NotificationType;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import lombok.experimental.Accessors;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
@@ -14,7 +14,7 @@ import java.util.Map;
 @Getter
 @Setter
 @ToString
-@Accessors(chain = true)
+@Builder
 public class SendNotificationDto {
 
     @NotBlank

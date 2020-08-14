@@ -17,5 +17,6 @@ public class FileSaveDeleteDto {
     private long size;
     private long lastModified;
     private long userStored;
+    private boolean sendNotification;
 
 }

@@ -3,7 +3,7 @@ package com.lamar.primebox.web.controller;
 import com.lamar.primebox.web.dto.model.UserBasicDto;
 import com.lamar.primebox.web.dto.model.UserDto;
 import com.lamar.primebox.web.dto.request.UserUpdateRequest;
-import com.lamar.primebox.web.dto.response.UserDeleteResponse;
+import com.lamar.primebox.web.dto.response.UserDeactivateResponse;
 import com.lamar.primebox.web.dto.response.UserUpdateResponse;
 import com.lamar.primebox.web.model.User;
 import com.lamar.primebox.web.service.UserService;
@@ -31,25 +31,30 @@ public class UserController {
         this.modelMapper = modelMapper;
     }
 
-    @PatchMapping("")
+    @PatchMapping
     public ResponseEntity<?> updateUser(@RequestBody @Valid UserUpdateRequest updateRequest) throws Exception {
         final UserBasicDto userBasicDto = modelMapper.map(updateRequest, UserBasicDto.class)
                 .setUsername(getUsernameFromSecurityContext());
         final UserDto userDto = this.userService.updateUser(userBasicDto);
         final UserUpdateResponse updateResponse = modelMapper.map(userDto, UserUpdateResponse.class);
+
+        log.info(updateResponse.toString());
         return ResponseEntity.ok(updateResponse);
     }
 
-    @DeleteMapping("")
+    @DeleteMapping
     public ResponseEntity<?> deactivateUser() throws Exception {
         final UserDto userDto = userService.deactivateUser(getUsernameFromSecurityContext());
-        final UserDeleteResponse userDeleteResponse = modelMapper.map(userDto, UserDeleteResponse.class);
-        return ResponseEntity.ok(userDeleteResponse);
+        final UserDeactivateResponse userDeactivateResponse = modelMapper.map(userDto, UserDeactivateResponse.class);
+
+        log.info(userDeactivateResponse.toString());
+        return ResponseEntity.ok(userDeactivateResponse);
     }
 
     private String getUsernameFromSecurityContext() {
         final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         final User user = (User) authentication.getPrincipal();
+
         return user.getUsername();
     }
 

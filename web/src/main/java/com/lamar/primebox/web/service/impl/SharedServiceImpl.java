@@ -10,7 +10,6 @@ import com.lamar.primebox.web.repo.FileDao;
 import com.lamar.primebox.web.repo.SharedFileDao;
 import com.lamar.primebox.web.repo.UserDao;
 import com.lamar.primebox.web.service.SharedFileService;
-import com.lamar.primebox.web.util.JwtUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
@@ -28,14 +27,12 @@ public class SharedServiceImpl implements SharedFileService {
     private final UserDao userDao;
     private final FileDao fileDao;
     private final ModelMapper modelMapper;
-    private final JwtUtil jwtUtil;
 
-    public SharedServiceImpl(SharedFileDao sharedFileDao, UserDao userDao, FileDao fileDao, ModelMapper modelMapper, JwtUtil jwtUtil) {
+    public SharedServiceImpl(SharedFileDao sharedFileDao, UserDao userDao, FileDao fileDao, ModelMapper modelMapper) {
         this.sharedFileDao = sharedFileDao;
         this.userDao = userDao;
         this.fileDao = fileDao;
         this.modelMapper = modelMapper;
-        this.jwtUtil = jwtUtil;
     }
 
     @Override
@@ -53,15 +50,19 @@ public class SharedServiceImpl implements SharedFileService {
         final User user = userDao.getByUsername(sharedFileShareDto.getSharedUserUsername());
 
         if (user == null) {
-            throw new Exception("Exception! There is no such user!");
+            log.error("user not found");
+            throw new Exception("user not found");
         }
 
         if (!user.isEnabled()) {
-            throw new Exception("Exception! Shared user is not active!");
+            log.error("user not active");
+
+            throw new Exception("user not active");
         }
 
         if (file == null) {
-            throw new Exception("Exception! There is no such file!");
+            log.error("file not found");
+            throw new Exception("file not found");
         }
 
         final SharedFile sharedFile = new SharedFile()
@@ -80,7 +81,8 @@ public class SharedServiceImpl implements SharedFileService {
         final SharedFile sharedFile = sharedFileDao.getSharedFile(sharedFileUnshareDto.getFileId(), sharedFileUnshareDto.getUsername());
 
         if (sharedFile == null) {
-            throw new Exception("Exception! Shared file does not exist.");
+            log.error("file not found");
+            throw new Exception("file not found");
         }
 
         sharedFileDao.deleteSharedFile(sharedFile);

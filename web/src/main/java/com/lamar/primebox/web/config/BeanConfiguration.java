@@ -11,6 +11,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.filter.CommonsRequestLoggingFilter;
 
 @Configuration
 public class BeanConfiguration {
@@ -18,22 +19,46 @@ public class BeanConfiguration {
     @Bean
     public ModelMapper modelMapper() {
         final ModelMapper mapper = new ModelMapper();
-        mapper.typeMap(UserSignUpRequest.class, UserBasicDto.class).addMapping(UserSignUpRequest::getEmail, UserBasicDto::setUsername);
-        mapper.typeMap(UserLogInRequest.class, UserCredentialsDto.class).addMapping(UserLogInRequest::getEmail, UserCredentialsDto::setUsername);
-        mapper.typeMap(UserLogInRequest.class, UserCredentialsDto.class).addMapping(UserLogInRequest::getEmail, UserCredentialsDto::setUsername);
-        mapper.typeMap(SharedFileDto.class, SharedFileShareResponse.class).addMapping(SharedFileDto::getSharedFileFileId, SharedFileShareResponse::setFileId);
-        mapper.typeMap(SharedFileDto.class, SharedFileShareResponse.class).addMapping(SharedFileDto::getSharedFileFilename, SharedFileShareResponse::setFilename);
-        mapper.typeMap(SharedFileDto.class, SharedFileShareResponse.class).addMapping(SharedFileDto::getSharedFileSize, SharedFileShareResponse::setSize);
-        mapper.typeMap(SharedFileDto.class, SharedFileShareResponse.class).addMapping(SharedFileDto::getSharedFileLastModified, SharedFileShareResponse::setLastModified);
-        mapper.typeMap(SharedFileDto.class, SharedFileShareResponse.class).addMapping(SharedFileDto::getSharedFileUserEmail, SharedFileShareResponse::setSharedUserUsername);
-        mapper.typeMap(SharedFileDto.class, SharedFileShareResponse.class).addMapping(SharedFileDto::getSharedFileUserName, SharedFileShareResponse::setSharedUserName);
-        mapper.typeMap(SharedFileDto.class, SharedFileShareResponse.class).addMapping(SharedFileDto::getSharedFileUserSurname, SharedFileShareResponse::setSharedUserSurname);
+
+        mapper.typeMap(UserSignUpRequest.class, UserBasicDto.class)
+                .addMapping(UserSignUpRequest::getEmail, UserBasicDto::setUsername);
+        mapper.typeMap(UserLogInRequest.class, UserCredentialsDto.class)
+                .addMapping(UserLogInRequest::getEmail, UserCredentialsDto::setUsername);
+        mapper.typeMap(UserLogInRequest.class, UserCredentialsDto.class)
+                .addMapping(UserLogInRequest::getEmail, UserCredentialsDto::setUsername);
+        mapper.typeMap(SharedFileDto.class, SharedFileShareResponse.class)
+                .addMapping(SharedFileDto::getSharedFileFileId, SharedFileShareResponse::setFileId);
+        mapper.typeMap(SharedFileDto.class, SharedFileShareResponse.class)
+                .addMapping(SharedFileDto::getSharedFileFilename, SharedFileShareResponse::setFilename);
+        mapper.typeMap(SharedFileDto.class, SharedFileShareResponse.class)
+                .addMapping(SharedFileDto::getSharedFileSize, SharedFileShareResponse::setSize);
+        mapper.typeMap(SharedFileDto.class, SharedFileShareResponse.class)
+                .addMapping(SharedFileDto::getSharedFileLastModified, SharedFileShareResponse::setLastModified);
+        mapper.typeMap(SharedFileDto.class, SharedFileShareResponse.class)
+                .addMapping(SharedFileDto::getSharedFileUserEmail, SharedFileShareResponse::setSharedUserUsername);
+        mapper.typeMap(SharedFileDto.class, SharedFileShareResponse.class)
+                .addMapping(SharedFileDto::getSharedFileUserName, SharedFileShareResponse::setSharedUserName);
+        mapper.typeMap(SharedFileDto.class, SharedFileShareResponse.class)
+                .addMapping(SharedFileDto::getSharedFileUserSurname, SharedFileShareResponse::setSharedUserSurname);
         return mapper;
     }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public CommonsRequestLoggingFilter logFilter() {
+        final CommonsRequestLoggingFilter filter = new CommonsRequestLoggingFilter();
+
+        filter.setIncludeClientInfo(true);
+        filter.setIncludeHeaders(true);
+        filter.setIncludeQueryString(true);
+        filter.setIncludePayload(true);
+        filter.setMaxPayloadLength(10000);
+        filter.setAfterMessagePrefix("REQUEST DATA: ");
+        return filter;
     }
 
 }

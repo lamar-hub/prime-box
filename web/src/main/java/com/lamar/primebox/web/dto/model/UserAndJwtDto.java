@@ -19,6 +19,8 @@ public class UserAndJwtDto {
     private long stored;
     private long limit;
     private boolean active;
+    private boolean twoFactorVerification;
+    private String verificationCode;
     private String jwtToken;
 
 }

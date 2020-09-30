@@ -1,11 +1,14 @@
 package com.lamar.primebox.web.controller;
 
 import com.lamar.primebox.web.dto.model.UserBasicDto;
+import com.lamar.primebox.web.dto.model.UserCredentialsDto;
 import com.lamar.primebox.web.dto.model.UserDto;
+import com.lamar.primebox.web.dto.model.UserUpdateDto;
 import com.lamar.primebox.web.dto.request.UserUpdateRequest;
 import com.lamar.primebox.web.dto.response.UserDeactivateResponse;
 import com.lamar.primebox.web.dto.response.UserUpdateResponse;
 import com.lamar.primebox.web.model.User;
+import com.lamar.primebox.web.model.UserCredentials;
 import com.lamar.primebox.web.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -33,9 +36,9 @@ public class UserController {
 
     @PatchMapping
     public ResponseEntity<?> updateUser(@RequestBody @Valid UserUpdateRequest updateRequest) throws Exception {
-        final UserBasicDto userBasicDto = modelMapper.map(updateRequest, UserBasicDto.class)
+        final UserUpdateDto userUpdateDto = modelMapper.map(updateRequest, UserUpdateDto.class)
                 .setUsername(getUsernameFromSecurityContext());
-        final UserDto userDto = this.userService.updateUser(userBasicDto);
+        final UserDto userDto = this.userService.updateUser(userUpdateDto);
         final UserUpdateResponse updateResponse = modelMapper.map(userDto, UserUpdateResponse.class);
 
         log.info(updateResponse.toString());
@@ -44,8 +47,8 @@ public class UserController {
 
     @DeleteMapping
     public ResponseEntity<?> deactivateUser() throws Exception {
-        final UserDto userDto = userService.deactivateUser(getUsernameFromSecurityContext());
-        final UserDeactivateResponse userDeactivateResponse = modelMapper.map(userDto, UserDeactivateResponse.class);
+        final UserCredentialsDto userCredentialsDto = userService.deactivateUser(getUsernameFromSecurityContext());
+        final UserDeactivateResponse userDeactivateResponse = modelMapper.map(userCredentialsDto, UserDeactivateResponse.class);
 
         log.info(userDeactivateResponse.toString());
         return ResponseEntity.ok(userDeactivateResponse);
@@ -53,9 +56,9 @@ public class UserController {
 
     private String getUsernameFromSecurityContext() {
         final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        final User user = (User) authentication.getPrincipal();
+        final UserCredentials userCredentials = (UserCredentials) authentication.getPrincipal();
 
-        return user.getUsername();
+        return userCredentials.getUsername();
     }
 
 }

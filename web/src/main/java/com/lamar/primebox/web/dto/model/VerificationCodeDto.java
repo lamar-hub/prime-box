@@ -9,12 +9,11 @@ import lombok.experimental.Accessors;
 @Setter
 @ToString
 @Accessors(chain = true)
-public class UserCredentialsDto {
-
-    private String userId;
-    private String username;
-    private String password;
+public class VerificationCodeDto {
+    
+    private String codeId;
+    private String code;
+    private long created;
     private boolean active;
-    private boolean twoFactorVerification;
 
 }

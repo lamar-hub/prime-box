@@ -47,17 +47,16 @@ public class SharedServiceImpl implements SharedFileService {
     @Transactional
     public SharedFileDto share(SharedFileShareDto sharedFileShareDto) throws Exception {
         final File file = fileDao.getFile(sharedFileShareDto.getFileId());
-        final User user = userDao.getByUsername(sharedFileShareDto.getSharedUserUsername());
+        final User sharedUser = userDao.getByEmail(sharedFileShareDto.getSharedUserUsername());
 
-        if (user == null) {
-            log.error("user not found");
-            throw new Exception("user not found");
+        if (sharedUser == null) {
+            log.error("shared user not found");
+            throw new Exception("shared user not found");
         }
 
-        if (!user.isEnabled()) {
-            log.error("user not active");
-
-            throw new Exception("user not active");
+        if (!sharedUser.getUserCredentials().isEnabled()) {
+            log.error("shared user not active");
+            throw new Exception("shared user not active");
         }
 
         if (file == null) {
@@ -65,11 +64,12 @@ public class SharedServiceImpl implements SharedFileService {
             throw new Exception("file not found");
         }
 
-        final SharedFile sharedFile = new SharedFile()
-                .setSharedFile(file)
-                .setSharedUser(user)
-                .setDate(new Date().getTime())
-                .setMessage(sharedFileShareDto.getMessage());
+        final SharedFile sharedFile = SharedFile.builder()
+                                                .sharedFile(file)
+                                                .sharedUser(sharedUser)
+                                                .date(new Date().getTime())
+                                                .message(sharedFileShareDto.getMessage())
+                                                .build();
 
         sharedFileDao.saveSharedFile(sharedFile);
         return modelMapper.map(sharedFile, SharedFileDto.class);

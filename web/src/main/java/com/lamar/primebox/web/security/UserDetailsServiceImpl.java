@@ -1,7 +1,8 @@
 package com.lamar.primebox.web.security;
 
-import com.lamar.primebox.web.dto.model.UserDto;
+import com.lamar.primebox.web.dto.model.UserCredentialsDto;
 import com.lamar.primebox.web.model.User;
+import com.lamar.primebox.web.model.UserCredentials;
 import com.lamar.primebox.web.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -22,19 +23,18 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         try {
-            final UserDto userDto = userService.getUser(username);
-            if (userDto == null) {
-                throw new Exception();
+            final UserCredentialsDto userCredentialsDto = userService.getUserCredentials(username);
+            if (userCredentialsDto == null) {
+                throw new Exception("user not found");
             }
-            return new User()
-                    .setUserId(userDto.getUserId())
-                    .setEmail(userDto.getEmail())
-                    .setPassword(userDto.getPassword())
-                    .setName(userDto.getName())
-                    .setSurname(userDto.getSurname())
-                    .setStored(userDto.getStored())
-                    .setLimit(userDto.getLimit())
-                    .setActive(userDto.isActive());
+
+            return UserCredentials.builder()
+                                  .userId(userCredentialsDto.getUserId())
+                                  .username(userCredentialsDto.getUsername())
+                                  .password(userCredentialsDto.getPassword())
+                                  .active(userCredentialsDto.isActive())
+                                  .twoFactorVerification(userCredentialsDto.isTwoFactorVerification())
+                                  .build();
         } catch (Exception exception) {
             log.error("user not found", exception);
             throw new UsernameNotFoundException("user not found");

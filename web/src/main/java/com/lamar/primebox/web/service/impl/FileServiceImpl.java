@@ -3,7 +3,6 @@ package com.lamar.primebox.web.service.impl;
 import com.lamar.primebox.web.dto.model.FileDownloadDto;
 import com.lamar.primebox.web.dto.model.FileDto;
 import com.lamar.primebox.web.dto.model.FileSaveDeleteDto;
-import com.lamar.primebox.web.dto.model.FileUpdateDto;
 import com.lamar.primebox.web.model.File;
 import com.lamar.primebox.web.model.User;
 import com.lamar.primebox.web.repo.FileDao;
@@ -50,7 +49,7 @@ public class FileServiceImpl implements FileService {
     @Override
     @Transactional
     public FileSaveDeleteDto saveFile(MultipartFile multipartFile, String username) throws Exception {
-        final User user = userDao.getByUsername(username);
+        final User user = userDao.getByEmail(username);
 
         if (user == null) {
             log.error("user not found");
@@ -66,12 +65,11 @@ public class FileServiceImpl implements FileService {
             throw new Exception("user have no space anymore");
         }
 
-        final File file = new File()
-                .setFilename(multipartFile.getOriginalFilename())
-                .setType(multipartFile.getContentType())
-                .setSize((int) multipartFile.getSize())
-                .setLastModified(new Date().getTime())
-                .setUser(user);
+        final File file = new File().setFilename(multipartFile.getOriginalFilename())
+                                    .setType(multipartFile.getContentType())
+                                    .setSize((int) multipartFile.getSize())
+                                    .setLastModified(new Date().getTime())
+                                    .setUser(user);
         fileDao.saveFile(file);
 
         final long storedAfterSave = storedBeforeSave + file.getSize();
@@ -80,8 +78,8 @@ public class FileServiceImpl implements FileService {
         final boolean sendNotification = sendNotification(storedBeforeSave, storedAfterSave, userLimit);
 
         return modelMapper.map(file, FileSaveDeleteDto.class)
-                .setUserStored(user.getStored())
-                .setSendNotification(sendNotification);
+                          .setUserStored(user.getStored())
+                          .setSendNotification(sendNotification);
     }
 
     private boolean sendNotification(long storedBeforeSave, long storedAfterSave, long userLimit) {
@@ -93,20 +91,6 @@ public class FileServiceImpl implements FileService {
 
     private boolean hasSpace(long storedBeforeSave, long userLimit, long fileSize) {
         return storedBeforeSave + fileSize <= userLimit;
-    }
-
-    @Override
-    @Transactional
-    public FileDto updateFile(FileUpdateDto fileUpdateDto) throws Exception {
-        final File file = fileDao.getFile(fileUpdateDto.getFileId());
-
-        if (file == null) {
-            log.error("file not found");
-            throw new Exception("file not found");
-        }
-
-        file.setFilename(fileUpdateDto.getFilename());
-        return modelMapper.map(file, FileDto.class);
     }
 
     @Override

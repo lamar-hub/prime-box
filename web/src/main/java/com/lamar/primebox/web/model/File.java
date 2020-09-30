@@ -1,23 +1,22 @@
 package com.lamar.primebox.web.model;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 import lombok.experimental.Accessors;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
 @ToString
 @Accessors(chain = true)
+@Builder
 @Entity
 @Table(name = "file")
 public class File {
@@ -37,12 +36,11 @@ public class File {
     @Column(name = "type")
     private String type;
 
-    @Positive
-    @NotNull
+    @PositiveOrZero
     @Column(name = "size")
     private long size;
 
-    @NotNull
+    @Positive
     @Column(name = "last_modified")
     private long lastModified;
 

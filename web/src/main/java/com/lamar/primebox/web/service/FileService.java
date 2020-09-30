@@ -14,8 +14,6 @@ public interface FileService {
 
     FileSaveDeleteDto saveFile(MultipartFile multipartFile, String username) throws Exception;
 
-    FileDto updateFile(FileUpdateDto fileUpdateDto) throws Exception;
-
     FileDownloadDto getFile(String fileID) throws Exception;
 
     FileSaveDeleteDto deleteFile(String fileId) throws Exception;

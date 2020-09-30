@@ -38,12 +38,12 @@ public class UserDaoHibernateImpl implements UserDao {
     }
 
     @Override
-    public User getByUsername(String username) {
+    public User getByEmail(String email) {
         final Session session = entityManager.unwrap(Session.class);
         final CriteriaBuilder builder = session.getCriteriaBuilder();
         final CriteriaQuery<User> criteriaQuery = builder.createQuery(User.class);
         final Root<User> root = criteriaQuery.from(User.class);
-        final Predicate predicate = builder.equal(root.get("email"), username);
+        final Predicate predicate = builder.equal(root.get("email"), email);
         criteriaQuery.select(root).where(predicate);
         final Query<User> query = session.createQuery(criteriaQuery);
 

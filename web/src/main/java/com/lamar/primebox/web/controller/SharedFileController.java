@@ -11,6 +11,7 @@ import com.lamar.primebox.web.dto.response.SharedFileShareResponse;
 import com.lamar.primebox.web.dto.response.SharedFileUnshareResponse;
 import com.lamar.primebox.web.dto.response.SharedGetAllResponse;
 import com.lamar.primebox.web.model.User;
+import com.lamar.primebox.web.model.UserCredentials;
 import com.lamar.primebox.web.service.SharedFileService;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -95,9 +96,9 @@ public class SharedFileController {
 
     private String getUsernameFromSecurityContext() {
         final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        final User user = (User) authentication.getPrincipal();
+        final UserCredentials userCredentials = (UserCredentials) authentication.getPrincipal();
 
-        return user.getUsername();
+        return userCredentials.getUsername();
     }
 
 }

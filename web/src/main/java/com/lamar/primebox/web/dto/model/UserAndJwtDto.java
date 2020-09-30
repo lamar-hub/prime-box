@@ -20,7 +20,6 @@ public class UserAndJwtDto {
     private long limit;
     private boolean active;
     private boolean twoFactorVerification;
-    private String verificationCode;
     private String jwtToken;
 
 }

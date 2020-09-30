@@ -3,20 +3,21 @@ package com.lamar.primebox.web.controller;
 import com.lamar.primebox.notification.dto.SendNotificationDto;
 import com.lamar.primebox.notification.manager.NotificationManager;
 import com.lamar.primebox.notification.model.NotificationType;
-import com.lamar.primebox.web.dto.model.UserAndJwtDto;
-import com.lamar.primebox.web.dto.model.UserBasicDto;
-import com.lamar.primebox.web.dto.model.UserCredentialsDto;
-import com.lamar.primebox.web.dto.model.UserDto;
+import com.lamar.primebox.web.dto.model.*;
+import com.lamar.primebox.web.dto.request.UserLogInCodeRequest;
 import com.lamar.primebox.web.dto.request.UserLogInRequest;
-import com.lamar.primebox.web.dto.request.UserLogInVerificationCodeRequest;
 import com.lamar.primebox.web.dto.request.UserSignUpRequest;
-import com.lamar.primebox.web.dto.response.UserLogInResponse;
 import com.lamar.primebox.web.dto.response.UserSignUpResponse;
 import com.lamar.primebox.web.service.UserService;
+import com.lamar.primebox.web.service.VerificationCodeService;
 import com.lamar.primebox.web.util.EmailUtil;
+import com.lamar.primebox.web.util.JwtUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -30,13 +31,24 @@ import java.util.Map;
 public class AuthController {
 
     private final UserService userService;
+    private final VerificationCodeService verificationCodeService;
+    private final AuthenticationManager authenticationManager;
     private final NotificationManager notificationManager;
     private final ModelMapper modelMapper;
+    private final JwtUtil jwtUtil;
 
-    public AuthController(UserService userService, NotificationManager notificationManager, ModelMapper modelMapper) {
+    public AuthController(UserService userService,
+                          VerificationCodeService verificationCodeService,
+                          AuthenticationManager authenticationManager,
+                          NotificationManager notificationManager,
+                          ModelMapper modelMapper,
+                          JwtUtil jwtUtil) {
         this.userService = userService;
+        this.verificationCodeService = verificationCodeService;
+        this.authenticationManager = authenticationManager;
         this.notificationManager = notificationManager;
         this.modelMapper = modelMapper;
+        this.jwtUtil = jwtUtil;
     }
 
     @PostMapping("/sign-up")
@@ -44,7 +56,7 @@ public class AuthController {
         final UserBasicDto userBasicDto = modelMapper.map(signUpRequest, UserBasicDto.class);
         final UserDto userDto = userService.addUser(userBasicDto);
 
-        final SendNotificationDto sendNotificationDto = createActivateSendEmailDto(userDto);
+        final SendNotificationDto sendNotificationDto = buildActivateNotification(userDto);
         try {
             notificationManager.queueNotification(sendNotificationDto);
         } catch (Exception exception) {
@@ -57,7 +69,7 @@ public class AuthController {
         return ResponseEntity.ok(signUpResponse);
     }
 
-    private SendNotificationDto createActivateSendEmailDto(UserDto user) {
+    private SendNotificationDto buildActivateNotification(UserDto user) {
         final Map<String, String> templateModel = new HashMap<>();
 
         templateModel.put("activationUrl", EmailUtil.createActivationUrl(user.getEmail(), "12345"));
@@ -70,47 +82,67 @@ public class AuthController {
     }
 
     @PostMapping("/log-in")
-    public ResponseEntity<?> createAuthenticationToken(@RequestBody @Valid UserLogInRequest logInRequest) throws Exception {
+    public ResponseEntity<?> logIn(@RequestBody @Valid UserLogInRequest logInRequest) throws Exception {
         final UserCredentialsDto userCredentialsDto = modelMapper.map(logInRequest, UserCredentialsDto.class);
-        final UserAndJwtDto userAndJwtDto = userService.authenticateUser(userCredentialsDto);
 
-        if (!userAndJwtDto.isTwoFactorVerification()) {
-            final UserLogInResponse logInResponse = modelMapper.map(userAndJwtDto, UserLogInResponse.class);
+        final UserCredentialsDto userCredentials = userService.getUserCredentials(logInRequest.getEmail());
 
-            log.info(logInRequest.toString());
-            return ResponseEntity.ok(logInResponse);
+        if (userCredentials.isTwoFactorVerification()) {
+            final VerificationCodeDto verificationCodeDto = verificationCodeService.createVerificationCode(userCredentials.getUsername());
+
+            final SendNotificationDto sendNotificationDto = buildVerificationCodeNotification(userCredentials.getUsername(), verificationCodeDto.getCode());
+            try {
+                notificationManager.queueNotification(sendNotificationDto);
+            } catch (Exception exception) {
+                log.error("notification error", exception);
+            }
+
+            return ResponseEntity.status(HttpStatus.CONTINUE).build();
         }
 
-        final SendNotificationDto sendNotificationDto = buildVerificationCodeNotification(userAndJwtDto);
-        try {
-            notificationManager.queueNotification(sendNotificationDto);
-        } catch (Exception exception) {
-            log.error("notification error", exception);
-        }
+        final UserDto userDto = authenticateUser(userCredentialsDto.getUsername(), userCredentialsDto.getPassword());
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(userDto);
     }
 
-    private SendNotificationDto buildVerificationCodeNotification(UserAndJwtDto userAndJwtDto) {
+    @PostMapping("/log-in-code")
+    public ResponseEntity<?> logIn(@RequestBody @Valid UserLogInCodeRequest userLogInCodeRequest) throws Exception {
+        if (!verificationCodeService.checkVerificationCode(userLogInCodeRequest.getEmail(), userLogInCodeRequest.getVerificationCode())) {
+            log.error("code not valid");
+            throw new Exception("code not valid");
+        }
+
+        final UserDto userDto = authenticateUser(userLogInCodeRequest.getEmail(), userLogInCodeRequest.getPassword());
+
+        return ResponseEntity.ok(userDto);
+    }
+
+    private UserDto authenticateUser(String email, String password) throws Exception {
+        authenticate(email, password);
+
+        final UserDto userDto = userService.getUser(email);
+        final UserAndJwtDto userAndJwtDto = modelMapper.map(userDto, UserAndJwtDto.class);
+        final String jwtToken = jwtUtil.generateToken(userDto.getUserId(), userDto.getEmail());
+        userAndJwtDto.setJwtToken(jwtToken);
+        return userDto;
+    }
+
+    private void authenticate(String username, String password) {
+        final UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken
+                = new UsernamePasswordAuthenticationToken(username, password);
+        authenticationManager.authenticate(usernamePasswordAuthenticationToken);
+    }
+
+    private SendNotificationDto buildVerificationCodeNotification(String email, String code) {
         final Map<String, String> templateModel = new HashMap<>();
 
-        templateModel.put("code", userAndJwtDto.getVerificationCode());
+        templateModel.put("code", code);
         return SendNotificationDto
                 .builder()
-                .notificationTo(userAndJwtDto.getEmail())
+                .notificationTo(email)
                 .notificationType(NotificationType.EMAIL_VERIFICATION)
                 .templateModel(templateModel)
                 .build();
-    }
-
-    @PostMapping("/log-in-verification-code")
-    public ResponseEntity<?> createVerificationCodeAuthenticationToken(@RequestBody @Valid UserLogInVerificationCodeRequest userLogInVerificationCodeRequest) throws Exception {
-        final UserCredentialsDto userCredentialsDto = modelMapper.map(userLogInVerificationCodeRequest, UserCredentialsDto.class);
-        final UserAndJwtDto userAndJwtDto = userService.authenticateVerificationCodeUser(userCredentialsDto);
-        final UserLogInResponse userLogInResponse = modelMapper.map(userAndJwtDto, UserLogInResponse.class);
-
-        log.info(userLogInResponse.toString());
-        return ResponseEntity.ok(userLogInResponse);
     }
 
 }

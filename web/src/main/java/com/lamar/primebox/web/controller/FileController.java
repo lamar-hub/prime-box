@@ -13,6 +13,7 @@ import com.lamar.primebox.web.dto.response.FileGetAllResponse;
 import com.lamar.primebox.web.dto.response.FileSaveResponse;
 import com.lamar.primebox.web.dto.response.FileUpdateResponse;
 import com.lamar.primebox.web.model.User;
+import com.lamar.primebox.web.model.UserCredentials;
 import com.lamar.primebox.web.service.FileService;
 import com.lamar.primebox.web.util.StorageProperties;
 import com.lamar.primebox.web.util.StorageUtil;
@@ -101,16 +102,6 @@ public class FileController {
                 .build();
     }
 
-    @PutMapping
-    public ResponseEntity<?> updateFilename(@RequestBody @Valid FileUpdateRequest fileUpdateRequest) throws Exception {
-        final FileUpdateDto fileUpdateDto = modelMapper.map(fileUpdateRequest, FileUpdateDto.class);
-        final FileDto fileDto = fileService.updateFile(fileUpdateDto);
-        final FileUpdateResponse fileUpdateResponse = modelMapper.map(fileDto, FileUpdateResponse.class);
-
-        log.info(fileUpdateResponse.toString());
-        return ResponseEntity.ok(fileUpdateResponse);
-    }
-
     @GetMapping("/{fileId}/download")
     public ResponseEntity<ByteArrayResource> getFile(@PathVariable @NotBlank String fileId) throws Exception {
         final FileDownloadDto fileDownloadDto = fileService.getFile(fileId);
@@ -144,9 +135,9 @@ public class FileController {
 
     private String getUsernameFromSecurityContext() {
         final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        final User user = (User) authentication.getPrincipal();
+        final UserCredentials userCredentials = (UserCredentials) authentication.getPrincipal();
 
-        return user.getUsername();
+        return userCredentials.getUsername();
     }
 
 }

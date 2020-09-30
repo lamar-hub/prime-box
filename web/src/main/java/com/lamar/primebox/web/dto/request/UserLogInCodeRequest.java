@@ -12,7 +12,7 @@ import java.io.Serializable;
 @Getter
 @Setter
 @ToString
-public class UserLogInVerificationCodeRequest implements Serializable {
+public class UserLogInCodeRequest implements Serializable {
 
     @Email
     @NotBlank

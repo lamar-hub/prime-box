@@ -1,22 +1,21 @@
 package com.lamar.primebox.web.model;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 import lombok.experimental.Accessors;
 
 import javax.persistence.*;
 import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Positive;
 import java.io.Serializable;
 import java.util.Date;
 
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
 @ToString
 @Accessors(chain = true)
+@Builder
 @Entity
 @Table(name = "shared")
 public class SharedFile implements Serializable {
@@ -36,7 +35,7 @@ public class SharedFile implements Serializable {
     @Column(name = "message")
     private String message;
 
-    @NotNull
+    @Positive
     @Column(name = "date")
     private long date;
 

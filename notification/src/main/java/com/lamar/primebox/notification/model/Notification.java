@@ -50,7 +50,7 @@ public class Notification {
 
     @NotNull
     @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(name = "template_model", joinColumns = @JoinColumn(name = "notification_id"))
+    @CollectionTable(name = "notification_template_model", joinColumns = @JoinColumn(name = "notification_id"))
     @MapKeyColumn(name = "model_key")
     @Column(name = "model_value")
     private Map<String, String> templateModel = new HashMap<>();

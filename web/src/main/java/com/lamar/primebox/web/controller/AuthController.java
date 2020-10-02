@@ -3,7 +3,10 @@ package com.lamar.primebox.web.controller;
 import com.lamar.primebox.notification.dto.SendNotificationDto;
 import com.lamar.primebox.notification.manager.NotificationManager;
 import com.lamar.primebox.notification.model.NotificationType;
-import com.lamar.primebox.web.dto.model.*;
+import com.lamar.primebox.web.dto.model.UserAndJwtDto;
+import com.lamar.primebox.web.dto.model.UserBasicDto;
+import com.lamar.primebox.web.dto.model.UserDto;
+import com.lamar.primebox.web.dto.model.VerificationCodeDto;
 import com.lamar.primebox.web.dto.request.UserLogInCodeRequest;
 import com.lamar.primebox.web.dto.request.UserLogInRequest;
 import com.lamar.primebox.web.dto.request.UserSignUpRequest;
@@ -14,6 +17,7 @@ import com.lamar.primebox.web.util.EmailUtil;
 import com.lamar.primebox.web.util.JwtUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -41,7 +45,7 @@ public class AuthController {
                           VerificationCodeService verificationCodeService,
                           AuthenticationManager authenticationManager,
                           NotificationManager notificationManager,
-                          ModelMapper modelMapper,
+                          @Qualifier("webModelMapper") ModelMapper modelMapper,
                           JwtUtil jwtUtil) {
         this.userService = userService;
         this.verificationCodeService = verificationCodeService;
@@ -57,11 +61,11 @@ public class AuthController {
         final UserDto userDto = userService.addUser(userBasicDto);
 
         final SendNotificationDto sendNotificationDto = buildActivateNotification(userDto);
-        try {
-            notificationManager.queueNotification(sendNotificationDto);
-        } catch (Exception exception) {
-            log.error("notification error", exception);
-        }
+        //        try {
+        //            notificationManager.queueNotification(sendNotificationDto);
+        //        } catch (Exception exception) {
+        //            log.error("notification error", exception);
+        //        }
 
         final UserSignUpResponse signUpResponse = modelMapper.map(userDto, UserSignUpResponse.class);
 
@@ -69,13 +73,15 @@ public class AuthController {
         return ResponseEntity.ok(signUpResponse);
     }
 
-    private SendNotificationDto buildActivateNotification(UserDto user) {
+    private SendNotificationDto buildActivateNotification(UserDto userDto) {
         final Map<String, String> templateModel = new HashMap<>();
 
-        templateModel.put("activationUrl", EmailUtil.createActivationUrl(user.getEmail(), "12345"));
+        templateModel.put("activationUrl",
+                          EmailUtil.createActivationUrl(userDto.getEmail(), userDto.getUserId()));
+        log.info(templateModel.get("activationUrl"));
         return SendNotificationDto
                 .builder()
-                .notificationTo(user.getEmail())
+                .notificationTo(userDto.getEmail())
                 .notificationType(NotificationType.EMAIL_ACTIVATION)
                 .templateModel(templateModel)
                 .build();
@@ -83,48 +89,44 @@ public class AuthController {
 
     @PostMapping("/log-in")
     public ResponseEntity<?> logIn(@RequestBody @Valid UserLogInRequest logInRequest) throws Exception {
-        final UserCredentialsDto userCredentialsDto = modelMapper.map(logInRequest, UserCredentialsDto.class);
+        final UserDto userDto = userService.getUser(logInRequest.getEmail());
 
-        final UserCredentialsDto userCredentials = userService.getUserCredentials(logInRequest.getEmail());
+        authenticate(userDto.getEmail(), logInRequest.getPassword());
 
-        if (userCredentials.isTwoFactorVerification()) {
-            final VerificationCodeDto verificationCodeDto = verificationCodeService.createVerificationCode(userCredentials.getUsername());
+        if (userDto.isTwoFactorVerification()) {
+            final VerificationCodeDto verificationCodeDto = verificationCodeService.createVerificationCode(userDto.getEmail());
 
-            final SendNotificationDto sendNotificationDto = buildVerificationCodeNotification(userCredentials.getUsername(), verificationCodeDto.getCode());
-            try {
-                notificationManager.queueNotification(sendNotificationDto);
-            } catch (Exception exception) {
-                log.error("notification error", exception);
-            }
+            //            final SendNotificationDto sendNotificationDto = buildVerificationCodeNotification(userCredentials.getUsername(), verificationCodeDto.getCode());
+            //            try {
+            //                notificationManager.queueNotification(sendNotificationDto);
+            //            } catch (Exception exception) {
+            //                log.error("notification error", exception);
+            //            }
 
             return ResponseEntity.status(HttpStatus.CONTINUE).build();
         }
 
-        final UserDto userDto = authenticateUser(userCredentialsDto.getUsername(), userCredentialsDto.getPassword());
-
-        return ResponseEntity.ok(userDto);
+        final UserAndJwtDto userAndJwtDto = modelMapper.map(userDto, UserAndJwtDto.class);
+        final String jwtToken = jwtUtil.generateToken(userDto.getUserId(), userDto.getEmail());
+        userAndJwtDto.setJwtToken(jwtToken);
+        return ResponseEntity.ok(userAndJwtDto);
     }
 
     @PostMapping("/log-in-code")
     public ResponseEntity<?> logIn(@RequestBody @Valid UserLogInCodeRequest userLogInCodeRequest) throws Exception {
+        final UserDto userDto = userService.getUser(userLogInCodeRequest.getEmail());
+
+        authenticate(userLogInCodeRequest.getEmail(), userLogInCodeRequest.getPassword());
+
         if (!verificationCodeService.checkVerificationCode(userLogInCodeRequest.getEmail(), userLogInCodeRequest.getVerificationCode())) {
             log.error("code not valid");
             throw new Exception("code not valid");
         }
 
-        final UserDto userDto = authenticateUser(userLogInCodeRequest.getEmail(), userLogInCodeRequest.getPassword());
-
-        return ResponseEntity.ok(userDto);
-    }
-
-    private UserDto authenticateUser(String email, String password) throws Exception {
-        authenticate(email, password);
-
-        final UserDto userDto = userService.getUser(email);
         final UserAndJwtDto userAndJwtDto = modelMapper.map(userDto, UserAndJwtDto.class);
         final String jwtToken = jwtUtil.generateToken(userDto.getUserId(), userDto.getEmail());
         userAndJwtDto.setJwtToken(jwtToken);
-        return userDto;
+        return ResponseEntity.ok(userAndJwtDto);
     }
 
     private void authenticate(String username, String password) {
@@ -143,6 +145,24 @@ public class AuthController {
                 .notificationType(NotificationType.EMAIL_VERIFICATION)
                 .templateModel(templateModel)
                 .build();
+    }
+
+    @GetMapping("/activate")
+    public ResponseEntity<?> activateUser(@RequestParam String username, @RequestParam String encodedSecret) throws Exception {
+        final UserDto userDto = userService.getUser(username);
+
+        if (userDto.isActive()) {
+            throw new Exception("user already active");
+        }
+
+        final String secretHmacSha256Encoded = EmailUtil.createSecretHmacSha256Encoded(userDto.getEmail(), userDto.getUserId());
+
+        if (!encodedSecret.equals(secretHmacSha256Encoded)) {
+            throw new Exception("wrong secret");
+        }
+
+        userService.activateUser(userDto.getEmail());
+        return ResponseEntity.ok().build();
     }
 
 }

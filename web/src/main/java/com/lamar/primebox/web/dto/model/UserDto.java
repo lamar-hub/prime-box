@@ -19,5 +19,6 @@ public class UserDto {
     private long stored;
     private long limit;
     private boolean active;
+    private boolean twoFactorVerification;
 
 }

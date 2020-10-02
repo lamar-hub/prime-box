@@ -11,6 +11,7 @@ import com.lamar.primebox.web.service.FileService;
 import com.lamar.primebox.web.util.StorageProperties;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -31,7 +32,10 @@ public class FileServiceImpl implements FileService {
     private final ModelMapper modelMapper;
     private final StorageProperties storageProperties;
 
-    public FileServiceImpl(FileDao fileDao, UserDao userDao, ModelMapper modelMapper, StorageProperties storageProperties) {
+    public FileServiceImpl(FileDao fileDao,
+                           UserDao userDao,
+                           @Qualifier("webModelMapper") ModelMapper modelMapper,
+                           StorageProperties storageProperties) {
         this.fileDao = fileDao;
         this.userDao = userDao;
         this.modelMapper = modelMapper;

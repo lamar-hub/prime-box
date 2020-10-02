@@ -9,6 +9,7 @@ import com.lamar.primebox.notification.repo.NotificationDao;
 import com.lamar.primebox.notification.service.NotificationService;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -22,7 +23,7 @@ public class NotificationServiceImpl implements NotificationService {
     private final NotificationDao notificationDao;
     private final ModelMapper modelMapper;
 
-    public NotificationServiceImpl(NotificationDao notificationDao, ModelMapper modelMapper) {
+    public NotificationServiceImpl(NotificationDao notificationDao, @Qualifier("sgModelMapper") ModelMapper modelMapper) {
         this.notificationDao = notificationDao;
         this.modelMapper = modelMapper;
     }

@@ -56,7 +56,7 @@ public class NotificationManagerImpl implements NotificationManager {
         notificationService.saveNotification(sendNotificationDto);
     }
 
-    @Scheduled(fixedRate = 10000)
+//    @Scheduled(fixedRate = 10000)
     @Override
     public void processNotification() {
         final List<NotificationDto> notificationChunk = notificationService.getNotificationChunk(20);

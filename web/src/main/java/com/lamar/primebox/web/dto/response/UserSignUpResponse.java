@@ -19,5 +19,7 @@ public class UserSignUpResponse implements Serializable {
     private String surname;
     private long stored;
     private long limit;
+    private boolean active;
+    private boolean twoFactorVerification;
 
 }

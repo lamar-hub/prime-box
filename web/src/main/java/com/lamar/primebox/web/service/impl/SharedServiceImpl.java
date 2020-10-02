@@ -12,6 +12,7 @@ import com.lamar.primebox.web.repo.UserDao;
 import com.lamar.primebox.web.service.SharedFileService;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -28,7 +29,10 @@ public class SharedServiceImpl implements SharedFileService {
     private final FileDao fileDao;
     private final ModelMapper modelMapper;
 
-    public SharedServiceImpl(SharedFileDao sharedFileDao, UserDao userDao, FileDao fileDao, ModelMapper modelMapper) {
+    public SharedServiceImpl(SharedFileDao sharedFileDao,
+                             UserDao userDao,
+                             FileDao fileDao,
+                             @Qualifier("webModelMapper") ModelMapper modelMapper) {
         this.sharedFileDao = sharedFileDao;
         this.userDao = userDao;
         this.fileDao = fileDao;
@@ -54,7 +58,7 @@ public class SharedServiceImpl implements SharedFileService {
             throw new Exception("shared user not found");
         }
 
-        if (!sharedUser.getUserCredentials().isEnabled()) {
+        if (!sharedUser.isEnabled()) {
             log.error("shared user not active");
             throw new Exception("shared user not active");
         }

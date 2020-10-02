@@ -9,6 +9,7 @@ import com.lamar.primebox.web.service.VerificationCodeService;
 import com.lamar.primebox.web.util.StorageUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -22,7 +23,9 @@ public class VerificationCodeServiceImpl implements VerificationCodeService {
     private final VerificationCodeDao verificationCodeDao;
     private final ModelMapper modelMapper;
 
-    public VerificationCodeServiceImpl(UserDao userDao, VerificationCodeDao verificationCodeDao, ModelMapper modelMapper) {
+    public VerificationCodeServiceImpl(UserDao userDao,
+                                       VerificationCodeDao verificationCodeDao,
+                                       @Qualifier("webModelMapper") ModelMapper modelMapper) {
         this.userDao = userDao;
         this.verificationCodeDao = verificationCodeDao;
         this.modelMapper = modelMapper;

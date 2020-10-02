@@ -6,19 +6,17 @@ import com.lamar.primebox.notification.model.NotificationType;
 import com.lamar.primebox.web.dto.model.FileDownloadDto;
 import com.lamar.primebox.web.dto.model.FileDto;
 import com.lamar.primebox.web.dto.model.FileSaveDeleteDto;
-import com.lamar.primebox.web.dto.model.FileUpdateDto;
-import com.lamar.primebox.web.dto.request.FileUpdateRequest;
+import com.lamar.primebox.web.dto.model.UserDto;
 import com.lamar.primebox.web.dto.response.FileDeleteResponse;
 import com.lamar.primebox.web.dto.response.FileGetAllResponse;
 import com.lamar.primebox.web.dto.response.FileSaveResponse;
-import com.lamar.primebox.web.dto.response.FileUpdateResponse;
 import com.lamar.primebox.web.model.User;
-import com.lamar.primebox.web.model.UserCredentials;
 import com.lamar.primebox.web.service.FileService;
 import com.lamar.primebox.web.util.StorageProperties;
 import com.lamar.primebox.web.util.StorageUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -28,7 +26,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.io.IOException;
@@ -48,7 +45,10 @@ public class FileController {
     private final ModelMapper modelMapper;
     private final StorageProperties storageProperties;
 
-    public FileController(FileService fileService, NotificationManager notificationManager, ModelMapper modelMapper, StorageProperties storageProperties) {
+    public FileController(FileService fileService,
+                          NotificationManager notificationManager,
+                          @Qualifier("webModelMapper") ModelMapper modelMapper,
+                          StorageProperties storageProperties) {
         this.fileService = fileService;
         this.notificationManager = notificationManager;
         this.modelMapper = modelMapper;
@@ -75,14 +75,14 @@ public class FileController {
             fileService.deleteFile(fileSaveDeleteDto.getFileId());
         }
 
-        if (fileSaveDeleteDto.isSendNotification()) {
-            final SendNotificationDto sendNotificationDto = buildAlertNotification(fileSaveDeleteDto);
-            try {
-                notificationManager.queueNotification(sendNotificationDto);
-            } catch (Exception exception) {
-                log.error("notification error", exception);
-            }
-        }
+        //        if (fileSaveDeleteDto.isSendNotification()) {
+        //            final SendNotificationDto sendNotificationDto = buildAlertNotification(fileSaveDeleteDto);
+        //            try {
+        //                notificationManager.queueNotification(sendNotificationDto);
+        //            } catch (Exception exception) {
+        //                log.error("notification error", exception);
+        //            }
+        //        }
 
         final FileSaveResponse saveResponse = modelMapper.map(fileSaveDeleteDto, FileSaveResponse.class);
 
@@ -135,9 +135,7 @@ public class FileController {
 
     private String getUsernameFromSecurityContext() {
         final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        final UserCredentials userCredentials = (UserCredentials) authentication.getPrincipal();
-
-        return userCredentials.getUsername();
+        return ((User) authentication.getPrincipal()).getEmail();
     }
 
 }

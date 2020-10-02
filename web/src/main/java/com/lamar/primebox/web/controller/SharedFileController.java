@@ -6,15 +6,16 @@ import com.lamar.primebox.notification.model.NotificationType;
 import com.lamar.primebox.web.dto.model.SharedFileDto;
 import com.lamar.primebox.web.dto.model.SharedFileShareDto;
 import com.lamar.primebox.web.dto.model.SharedFileUnshareDto;
+import com.lamar.primebox.web.dto.model.UserDto;
 import com.lamar.primebox.web.dto.request.SharedFileShareRequest;
 import com.lamar.primebox.web.dto.response.SharedFileShareResponse;
 import com.lamar.primebox.web.dto.response.SharedFileUnshareResponse;
 import com.lamar.primebox.web.dto.response.SharedGetAllResponse;
 import com.lamar.primebox.web.model.User;
-import com.lamar.primebox.web.model.UserCredentials;
 import com.lamar.primebox.web.service.SharedFileService;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -37,7 +38,9 @@ public class SharedFileController {
     private final NotificationManager notificationManager;
     private final ModelMapper modelMapper;
 
-    public SharedFileController(SharedFileService sharedService, NotificationManager notificationManager, ModelMapper modelMapper) {
+    public SharedFileController(SharedFileService sharedService,
+                                NotificationManager notificationManager,
+                                @Qualifier("webModelMapper") ModelMapper modelMapper) {
         this.sharedService = sharedService;
         this.notificationManager = notificationManager;
         this.modelMapper = modelMapper;
@@ -57,12 +60,12 @@ public class SharedFileController {
         final SharedFileShareDto sharedFileShareDto = modelMapper.map(sharedFileShareRequest, SharedFileShareDto.class);
         final SharedFileDto sharedFileDto = sharedService.share(sharedFileShareDto);
 
-        final SendNotificationDto sendNotificationDto = buildShareFileNotification(sharedFileDto);
-        try {
-            notificationManager.queueNotification(sendNotificationDto);
-        } catch (Exception exception) {
-            log.error("notification error", exception);
-        }
+        //        final SendNotificationDto sendNotificationDto = buildShareFileNotification(sharedFileDto);
+        //        try {
+        //            notificationManager.queueNotification(sendNotificationDto);
+        //        } catch (Exception exception) {
+        //            log.error("notification error", exception);
+        //        }
 
         final SharedFileShareResponse shareResponse = modelMapper.map(sharedFileDto, SharedFileShareResponse.class);
 
@@ -96,9 +99,7 @@ public class SharedFileController {
 
     private String getUsernameFromSecurityContext() {
         final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        final UserCredentials userCredentials = (UserCredentials) authentication.getPrincipal();
-
-        return userCredentials.getUsername();
+        return ((User) authentication.getPrincipal()).getEmail();
     }
 
 }

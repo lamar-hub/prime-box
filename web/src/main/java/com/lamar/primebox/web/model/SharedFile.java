@@ -39,11 +39,6 @@ public class SharedFile implements Serializable {
     @Column(name = "date")
     private long date;
 
-    public SharedFile(String message, long date) {
-        this.message = message;
-        this.date = date;
-    }
-
     @PrePersist
     protected void onCreate() {
         this.date = new Date().getTime();

@@ -4,13 +4,13 @@ import com.lamar.primebox.notification.constant.PrimeBoxEmailConstants;
 import com.lamar.primebox.notification.dto.NotificationDto;
 import com.lamar.primebox.notification.sender.email.EmailSender;
 import com.lamar.primebox.notification.sender.email.TemplateResolver;
+import com.lamar.primebox.notification.sender.email.model.Mail;
+import com.lamar.primebox.notification.sender.email.model.objects.Content;
+import com.lamar.primebox.notification.sender.email.model.objects.Email;
 import com.sendgrid.Method;
 import com.sendgrid.Request;
 import com.sendgrid.Response;
 import com.sendgrid.SendGrid;
-import com.sendgrid.helpers.mail.Mail;
-import com.sendgrid.helpers.mail.objects.Content;
-import com.sendgrid.helpers.mail.objects.Email;
 import org.apache.http.entity.ContentType;
 import org.springframework.stereotype.Component;
 
@@ -33,7 +33,6 @@ public class SendGridEmailSender implements EmailSender {
     public String sendEmailRequest(NotificationDto notificationDto) throws IOException {
         final Mail mail = buildMail(notificationDto);
         final Request request = buildRequest(mail);
-
         final Response response = sendGrid.api(request);
 
         if (response.getStatusCode() != 202) {

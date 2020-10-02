@@ -8,11 +8,11 @@ import org.thymeleaf.spring5.SpringTemplateEngine;
 import java.util.Map;
 
 @Component
-public class ThymeleafTemplateResolver implements TemplateResolver {
+public class PrimeBoxThymeleafTemplateResolver implements TemplateResolver {
 
     private final SpringTemplateEngine thymeleafTemplateEngine;
 
-    public ThymeleafTemplateResolver(SpringTemplateEngine thymeleafTemplateEngine) {
+    public PrimeBoxThymeleafTemplateResolver(SpringTemplateEngine thymeleafTemplateEngine) {
         this.thymeleafTemplateEngine = thymeleafTemplateEngine;
     }
 

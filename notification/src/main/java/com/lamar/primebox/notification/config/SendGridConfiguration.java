@@ -1,7 +1,7 @@
 package com.lamar.primebox.notification.config;
 
+import com.google.common.base.Charsets;
 import com.sendgrid.SendGrid;
-import org.apache.commons.codec.Charsets;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -48,7 +48,7 @@ public class SendGridConfiguration {
         return templateEngine;
     }
 
-    @Bean
+    @Bean("sgModelMapper")
     public ModelMapper modelMapper() {
         return new ModelMapper();
     }

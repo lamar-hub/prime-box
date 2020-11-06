@@ -1,6 +1,7 @@
 package com.lamar.primebox.notification.repo.impl;
 
 import com.lamar.primebox.notification.model.Notification;
+import com.lamar.primebox.notification.model.NotificationState;
 import com.lamar.primebox.notification.repo.NotificationDao;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.Session;
@@ -32,17 +33,15 @@ public class NotificationDaoHibernateImpl implements NotificationDao {
     }
 
     @Override
-    public List<Notification> getNotificationChunk(Integer chunk) {
+    public List<Notification> getNotificationsByState(NotificationState notificationState) {
         final Session session = entityManager.unwrap(Session.class);
         final CriteriaBuilder builder = session.getCriteriaBuilder();
         final CriteriaQuery<Notification> criteriaQuery = builder.createQuery(Notification.class);
         final Root<Notification> root = criteriaQuery.from(Notification.class);
 
-        criteriaQuery.select(root);
+        criteriaQuery.select(root).where(builder.equal(root.get("notificationState"), notificationState));
 
         final Query<Notification> query = session.createQuery(criteriaQuery);
-        query.setFirstResult(0);
-        query.setMaxResults(chunk);
 
         return query.getResultList();
     }

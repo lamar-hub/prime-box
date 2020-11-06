@@ -7,7 +7,11 @@ public interface NotificationManager {
 
     void queueNotification(SendNotificationDto sendNotificationDto);
 
-    void processNotification();
+    void processInitNotifications();
+    
+    void processResendNotifications();
+    
+    void checkPendingNotifications();
 
     void submitNotification(NotificationWebhookDto notificationWebhookDto);
 

@@ -12,6 +12,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.util.Date;
 import java.util.List;
 
@@ -31,7 +32,7 @@ public class VerificationCodeServiceImpl implements VerificationCodeService {
         this.modelMapper = modelMapper;
     }
 
-
+    @Transactional
     @Override
     public boolean checkVerificationCode(String email, String verificationCode) {
         final List<VerificationCode> verificationCodes = verificationCodeDao.getVerificationCodeByEmail(email);
@@ -41,6 +42,7 @@ public class VerificationCodeServiceImpl implements VerificationCodeService {
                                 .anyMatch(code -> code.getCode().equals(verificationCode));
     }
 
+    @Transactional
     @Override
     public VerificationCodeDto createVerificationCode(String email) throws Exception {
         final User user = userDao.getByEmail(email);

@@ -33,7 +33,7 @@ public class SendGridConfiguration {
     public SpringResourceTemplateResolver thymeleafTemplateResolver() {
         final SpringResourceTemplateResolver templateResolver = new SpringResourceTemplateResolver();
 
-        templateResolver.setPrefix("/WEB-INF/templates/");
+        templateResolver.setPrefix("classpath:/WEB-INF/templates/");
         templateResolver.setSuffix(".html");
         templateResolver.setTemplateMode(TemplateMode.HTML);
         templateResolver.setCharacterEncoding(Charsets.UTF_8.displayName());

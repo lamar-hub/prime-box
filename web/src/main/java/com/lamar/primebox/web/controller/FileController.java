@@ -6,7 +6,6 @@ import com.lamar.primebox.notification.model.NotificationType;
 import com.lamar.primebox.web.dto.model.FileDownloadDto;
 import com.lamar.primebox.web.dto.model.FileDto;
 import com.lamar.primebox.web.dto.model.FileSaveDeleteDto;
-import com.lamar.primebox.web.dto.model.UserDto;
 import com.lamar.primebox.web.dto.response.FileDeleteResponse;
 import com.lamar.primebox.web.dto.response.FileGetAllResponse;
 import com.lamar.primebox.web.dto.response.FileSaveResponse;
@@ -75,14 +74,14 @@ public class FileController {
             fileService.deleteFile(fileSaveDeleteDto.getFileId());
         }
 
-        //        if (fileSaveDeleteDto.isSendNotification()) {
-        //            final SendNotificationDto sendNotificationDto = buildAlertNotification(fileSaveDeleteDto);
-        //            try {
-        //                notificationManager.queueNotification(sendNotificationDto);
-        //            } catch (Exception exception) {
-        //                log.error("notification error", exception);
-        //            }
-        //        }
+        if (fileSaveDeleteDto.isSendNotification()) {
+            final SendNotificationDto sendNotificationDto = buildAlertNotification(fileSaveDeleteDto);
+            try {
+                notificationManager.queueNotification(sendNotificationDto);
+            } catch (Exception exception) {
+                log.error("notification error", exception);
+            }
+        }
 
         final FileSaveResponse saveResponse = modelMapper.map(fileSaveDeleteDto, FileSaveResponse.class);
 

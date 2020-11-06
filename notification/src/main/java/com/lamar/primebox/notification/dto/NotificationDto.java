@@ -20,7 +20,7 @@ public class NotificationDto {
     private String notificationTo;
     private NotificationType notificationType;
     private NotificationState notificationState;
-    private Integer attemptCount;
+    private long mtime;
     private Map<String, String> templateModel;
 
 }

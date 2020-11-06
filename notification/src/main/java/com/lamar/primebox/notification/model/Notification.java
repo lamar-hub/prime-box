@@ -8,7 +8,7 @@ import org.hibernate.annotations.GenericGenerator;
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.PositiveOrZero;
+import javax.validation.constraints.Positive;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -43,10 +43,9 @@ public class Notification {
     @Column(name = "notification_state")
     private NotificationState notificationState;
 
-    @PositiveOrZero
-    @NotNull
-    @Column(name = "notification_attempt_count")
-    private Integer attemptCount;
+    @Positive
+    @Column(name = "notification_mtime")
+    private long mtime;
 
     @NotNull
     @ElementCollection(fetch = FetchType.EAGER)

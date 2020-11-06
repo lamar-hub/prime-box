@@ -40,10 +40,10 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Transactional
     @Override
-    public List<NotificationDto> getNotificationChunk(Integer chunk) {
-        final List<Notification> notificationChunk = notificationDao.getNotificationChunk(chunk);
+    public List<NotificationDto> getNotificationsByState(NotificationState notificationState) {
+        final List<Notification> initNotifications = notificationDao.getNotificationsByState(notificationState);
 
-        return notificationChunk
+        return initNotifications
                 .stream()
                 .map(notification -> modelMapper.map(notification, NotificationDto.class))
                 .collect(Collectors.toList());
@@ -64,6 +64,10 @@ public class NotificationServiceImpl implements NotificationService {
 
         if (notification == null) {
             throw new RuntimeException("there is no transaction");
+        }
+
+        if (notification.getNotificationState() != NotificationState.PENDING) {
+            throw new RuntimeException("transaction not in PENDING state");
         }
 
         notification.setNotificationState(notificationWebhookDto.getNotificationState());

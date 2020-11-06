@@ -18,7 +18,6 @@ import com.lamar.primebox.web.util.JwtUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -61,11 +60,11 @@ public class AuthController {
         final UserDto userDto = userService.addUser(userBasicDto);
 
         final SendNotificationDto sendNotificationDto = buildActivateNotification(userDto);
-        //        try {
-        //            notificationManager.queueNotification(sendNotificationDto);
-        //        } catch (Exception exception) {
-        //            log.error("notification error", exception);
-        //        }
+        try {
+            notificationManager.queueNotification(sendNotificationDto);
+        } catch (Exception exception) {
+            log.error("notification error", exception);
+        }
 
         final UserSignUpResponse signUpResponse = modelMapper.map(userDto, UserSignUpResponse.class);
 
@@ -96,14 +95,14 @@ public class AuthController {
         if (userDto.isTwoFactorVerification()) {
             final VerificationCodeDto verificationCodeDto = verificationCodeService.createVerificationCode(userDto.getEmail());
 
-            //            final SendNotificationDto sendNotificationDto = buildVerificationCodeNotification(userCredentials.getUsername(), verificationCodeDto.getCode());
-            //            try {
-            //                notificationManager.queueNotification(sendNotificationDto);
-            //            } catch (Exception exception) {
-            //                log.error("notification error", exception);
-            //            }
+            final SendNotificationDto sendNotificationDto = buildVerificationCodeNotification(userDto.getEmail(), verificationCodeDto.getCode());
+            try {
+                notificationManager.queueNotification(sendNotificationDto);
+            } catch (Exception exception) {
+                log.error("notification error", exception);
+            }
 
-            return ResponseEntity.status(HttpStatus.CONTINUE).build();
+            return ResponseEntity.ok().build();
         }
 
         final UserAndJwtDto userAndJwtDto = modelMapper.map(userDto, UserAndJwtDto.class);

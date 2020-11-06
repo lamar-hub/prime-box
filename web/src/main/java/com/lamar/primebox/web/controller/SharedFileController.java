@@ -6,7 +6,6 @@ import com.lamar.primebox.notification.model.NotificationType;
 import com.lamar.primebox.web.dto.model.SharedFileDto;
 import com.lamar.primebox.web.dto.model.SharedFileShareDto;
 import com.lamar.primebox.web.dto.model.SharedFileUnshareDto;
-import com.lamar.primebox.web.dto.model.UserDto;
 import com.lamar.primebox.web.dto.request.SharedFileShareRequest;
 import com.lamar.primebox.web.dto.response.SharedFileShareResponse;
 import com.lamar.primebox.web.dto.response.SharedFileUnshareResponse;
@@ -60,12 +59,12 @@ public class SharedFileController {
         final SharedFileShareDto sharedFileShareDto = modelMapper.map(sharedFileShareRequest, SharedFileShareDto.class);
         final SharedFileDto sharedFileDto = sharedService.share(sharedFileShareDto);
 
-        //        final SendNotificationDto sendNotificationDto = buildShareFileNotification(sharedFileDto);
-        //        try {
-        //            notificationManager.queueNotification(sendNotificationDto);
-        //        } catch (Exception exception) {
-        //            log.error("notification error", exception);
-        //        }
+        final SendNotificationDto sendNotificationDto = buildShareFileNotification(sharedFileDto);
+        try {
+            notificationManager.queueNotification(sendNotificationDto);
+        } catch (Exception exception) {
+            log.error("notification error", exception);
+        }
 
         final SharedFileShareResponse shareResponse = modelMapper.map(sharedFileDto, SharedFileShareResponse.class);
 

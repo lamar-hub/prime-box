@@ -1,7 +1,7 @@
 package com.lamar.primebox.web.controller;
 
 import com.lamar.primebox.notification.dto.SendNotificationDto;
-import com.lamar.primebox.notification.manager.NotificationManager;
+import com.lamar.primebox.notification.event.NotificationEvent;
 import com.lamar.primebox.notification.model.NotificationType;
 import com.lamar.primebox.web.dto.model.UserAndJwtDto;
 import com.lamar.primebox.web.dto.model.UserBasicDto;
@@ -18,6 +18,7 @@ import com.lamar.primebox.web.util.JwtUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -36,22 +37,22 @@ public class AuthController {
     private final UserService userService;
     private final VerificationCodeService verificationCodeService;
     private final AuthenticationManager authenticationManager;
-    private final NotificationManager notificationManager;
     private final ModelMapper modelMapper;
     private final JwtUtil jwtUtil;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     public AuthController(UserService userService,
                           VerificationCodeService verificationCodeService,
                           AuthenticationManager authenticationManager,
-                          NotificationManager notificationManager,
                           @Qualifier("webModelMapper") ModelMapper modelMapper,
-                          JwtUtil jwtUtil) {
+                          JwtUtil jwtUtil,
+                          ApplicationEventPublisher applicationEventPublisher) {
         this.userService = userService;
         this.verificationCodeService = verificationCodeService;
         this.authenticationManager = authenticationManager;
-        this.notificationManager = notificationManager;
         this.modelMapper = modelMapper;
         this.jwtUtil = jwtUtil;
+        this.applicationEventPublisher = applicationEventPublisher;
     }
 
     @PostMapping("/sign-up")
@@ -59,17 +60,19 @@ public class AuthController {
         final UserBasicDto userBasicDto = modelMapper.map(signUpRequest, UserBasicDto.class);
         final UserDto userDto = userService.addUser(userBasicDto);
 
-        final SendNotificationDto sendNotificationDto = buildActivateNotification(userDto);
-        try {
-            notificationManager.queueNotification(sendNotificationDto);
-        } catch (Exception exception) {
-            log.error("notification error", exception);
-        }
+        final SendNotificationDto notificationDto = buildActivateNotification(userDto);
+        dispatchNotification(notificationDto);
 
         final UserSignUpResponse signUpResponse = modelMapper.map(userDto, UserSignUpResponse.class);
 
         log.info(signUpResponse.toString());
         return ResponseEntity.ok(signUpResponse);
+    }
+
+    private void dispatchNotification(SendNotificationDto notificationDto) {
+        final NotificationEvent notificationEvent = new NotificationEvent(this, notificationDto);
+        
+        applicationEventPublisher.publishEvent(notificationEvent);
     }
 
     private SendNotificationDto buildActivateNotification(UserDto userDto) {
@@ -94,13 +97,9 @@ public class AuthController {
 
         if (userDto.isTwoFactorVerification()) {
             final VerificationCodeDto verificationCodeDto = verificationCodeService.createVerificationCode(userDto.getEmail());
-
             final SendNotificationDto sendNotificationDto = buildVerificationCodeNotification(userDto.getEmail(), verificationCodeDto.getCode());
-            try {
-                notificationManager.queueNotification(sendNotificationDto);
-            } catch (Exception exception) {
-                log.error("notification error", exception);
-            }
+            
+            dispatchNotification(sendNotificationDto);
 
             return ResponseEntity.ok().build();
         }

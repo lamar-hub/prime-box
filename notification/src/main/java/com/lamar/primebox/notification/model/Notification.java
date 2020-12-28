@@ -9,6 +9,7 @@ import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -54,4 +55,11 @@ public class Notification {
     @Column(name = "model_value")
     private Map<String, String> templateModel = new HashMap<>();
 
+    @PrePersist
+    @PreUpdate
+    public void setMtime() {
+        mtime = Instant.now().toEpochMilli();
+    }
+    
+    
 }

@@ -2,6 +2,9 @@ package com.lamar.primebox.notification.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.event.ApplicationEventMulticaster;
+import org.springframework.context.event.SimpleApplicationEventMulticaster;
+import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.filter.CommonsRequestLoggingFilter;
 
@@ -20,6 +23,15 @@ public class NotificationConfiguration {
         filter.setMaxPayloadLength(10000);
         filter.setAfterMessagePrefix("REQUEST DATA: ");
         return filter;
+    }
+
+
+    @Bean("applicationEventMulticaster")
+    public ApplicationEventMulticaster applicationEventMulticaster() {
+        final SimpleApplicationEventMulticaster simpleApplicationEventMulticaster = new SimpleApplicationEventMulticaster();
+
+        simpleApplicationEventMulticaster.setTaskExecutor(new SimpleAsyncTaskExecutor());
+        return simpleApplicationEventMulticaster;
     }
 
 }

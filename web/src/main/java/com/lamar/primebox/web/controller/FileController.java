@@ -1,7 +1,7 @@
 package com.lamar.primebox.web.controller;
 
 import com.lamar.primebox.notification.dto.SendNotificationDto;
-import com.lamar.primebox.notification.manager.NotificationManager;
+import com.lamar.primebox.notification.event.NotificationEvent;
 import com.lamar.primebox.notification.model.NotificationType;
 import com.lamar.primebox.web.dto.model.FileDownloadDto;
 import com.lamar.primebox.web.dto.model.FileDto;
@@ -16,6 +16,7 @@ import com.lamar.primebox.web.util.StorageUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -40,18 +41,17 @@ import java.util.Map;
 public class FileController {
 
     private final FileService fileService;
-    private final NotificationManager notificationManager;
     private final ModelMapper modelMapper;
     private final StorageProperties storageProperties;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     public FileController(FileService fileService,
-                          NotificationManager notificationManager,
                           @Qualifier("webModelMapper") ModelMapper modelMapper,
-                          StorageProperties storageProperties) {
+                          StorageProperties storageProperties, ApplicationEventPublisher applicationEventPublisher) {
         this.fileService = fileService;
-        this.notificationManager = notificationManager;
         this.modelMapper = modelMapper;
         this.storageProperties = storageProperties;
+        this.applicationEventPublisher = applicationEventPublisher;
     }
 
     @GetMapping
@@ -76,17 +76,20 @@ public class FileController {
 
         if (fileSaveDeleteDto.isSendNotification()) {
             final SendNotificationDto sendNotificationDto = buildAlertNotification(fileSaveDeleteDto);
-            try {
-                notificationManager.queueNotification(sendNotificationDto);
-            } catch (Exception exception) {
-                log.error("notification error", exception);
-            }
+            
+            dispatchNotification(sendNotificationDto);
         }
 
         final FileSaveResponse saveResponse = modelMapper.map(fileSaveDeleteDto, FileSaveResponse.class);
 
         log.info(saveResponse.toString());
         return ResponseEntity.ok(saveResponse);
+    }
+
+    private void dispatchNotification(SendNotificationDto notificationDto) {
+        final NotificationEvent notificationEvent = new NotificationEvent(this, notificationDto);
+
+        applicationEventPublisher.publishEvent(notificationEvent);
     }
 
     private SendNotificationDto buildAlertNotification(FileSaveDeleteDto fileSaveDeleteDto) {

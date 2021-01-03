@@ -12,9 +12,10 @@ import lombok.experimental.Accessors;
 public class UserUpdateDto {
 
     private String username;
-    private String password;
+    private String phone;
     private String name;
     private String surname;
+    private boolean active;
     private boolean twoFactorVerification;
     
 }

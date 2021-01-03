@@ -6,6 +6,7 @@ import lombok.ToString;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 import java.io.Serializable;
 
@@ -22,6 +23,10 @@ public class UserSignUpRequest implements Serializable {
     @NotBlank
     private String password;
 
+    @NotBlank
+    @Pattern(regexp = "^3816[0-5][0-9]{6,7}$")
+    private String phone;
+    
     @NotBlank
     private String name;
 

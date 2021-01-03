@@ -11,6 +11,8 @@ public interface UserService {
     UserDto addUser(UserBasicDto userBasicDto) throws Exception;
 
     UserDto updateUser(UserUpdateDto userUpdateDto) throws Exception;
+    
+    UserDto updateUserPlan(String username) throws Exception;
 
     UserDto activateUser(String username) throws Exception;
     

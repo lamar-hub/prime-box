@@ -10,6 +10,7 @@ import com.lamar.primebox.web.dto.model.VerificationCodeDto;
 import com.lamar.primebox.web.dto.request.UserLogInCodeRequest;
 import com.lamar.primebox.web.dto.request.UserLogInRequest;
 import com.lamar.primebox.web.dto.request.UserSignUpRequest;
+import com.lamar.primebox.web.dto.response.UserLogInResponse;
 import com.lamar.primebox.web.dto.response.UserSignUpResponse;
 import com.lamar.primebox.web.service.UserService;
 import com.lamar.primebox.web.service.VerificationCodeService;
@@ -90,7 +91,7 @@ public class AuthController {
     }
 
     @PostMapping("/log-in")
-    public ResponseEntity<?> logIn(@RequestBody @Valid UserLogInRequest logInRequest) throws Exception {
+    public ResponseEntity<?> logInCode(@RequestBody @Valid UserLogInRequest logInRequest) throws Exception {
         final UserDto userDto = userService.getUser(logInRequest.getEmail());
 
         authenticate(userDto.getEmail(), logInRequest.getPassword());
@@ -104,14 +105,16 @@ public class AuthController {
             return ResponseEntity.ok().build();
         }
 
-        final UserAndJwtDto userAndJwtDto = modelMapper.map(userDto, UserAndJwtDto.class);
         final String jwtToken = jwtUtil.generateToken(userDto.getUserId(), userDto.getEmail());
-        userAndJwtDto.setJwtToken(jwtToken);
-        return ResponseEntity.ok(userAndJwtDto);
+        final UserLogInResponse userLogInResponse = modelMapper.map(userDto, UserLogInResponse.class);
+        
+        userLogInResponse.setJwtToken(jwtToken);
+        log.info(userLogInResponse.toString());
+        return ResponseEntity.ok(userLogInResponse);
     }
 
     @PostMapping("/log-in-code")
-    public ResponseEntity<?> logIn(@RequestBody @Valid UserLogInCodeRequest userLogInCodeRequest) throws Exception {
+    public ResponseEntity<?> logInCode(@RequestBody @Valid UserLogInCodeRequest userLogInCodeRequest) throws Exception {
         final UserDto userDto = userService.getUser(userLogInCodeRequest.getEmail());
 
         authenticate(userLogInCodeRequest.getEmail(), userLogInCodeRequest.getPassword());
@@ -121,10 +124,12 @@ public class AuthController {
             throw new Exception("code not valid");
         }
 
-        final UserAndJwtDto userAndJwtDto = modelMapper.map(userDto, UserAndJwtDto.class);
         final String jwtToken = jwtUtil.generateToken(userDto.getUserId(), userDto.getEmail());
-        userAndJwtDto.setJwtToken(jwtToken);
-        return ResponseEntity.ok(userAndJwtDto);
+        final UserLogInResponse userLogInResponse = modelMapper.map(userDto, UserLogInResponse.class);
+
+        userLogInResponse.setJwtToken(jwtToken);
+        log.info(userLogInResponse.toString());
+        return ResponseEntity.ok(userLogInResponse);
     }
 
     private void authenticate(String username, String password) {
@@ -133,14 +138,14 @@ public class AuthController {
         authenticationManager.authenticate(usernamePasswordAuthenticationToken);
     }
 
-    private SendNotificationDto buildVerificationCodeNotification(String email, String code) {
+    private SendNotificationDto buildVerificationCodeNotification(String address, String code) {
         final Map<String, String> templateModel = new HashMap<>();
 
-        templateModel.put("code", code);
+        templateModel.put("message", String.format("Your verification code is %s", code));
         return SendNotificationDto
                 .builder()
-                .notificationTo(email)
-                .notificationType(NotificationType.EMAIL_VERIFICATION)
+                .notificationTo(address)
+                .notificationType(NotificationType.SMS_MESSAGE)
                 .templateModel(templateModel)
                 .build();
     }

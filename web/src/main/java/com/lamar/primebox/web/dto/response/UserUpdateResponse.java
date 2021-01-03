@@ -13,9 +13,12 @@ public class UserUpdateResponse {
 
     private String userId;
     private String email;
+    private String phone;
     private String name;
     private String surname;
     private long stored;
     private long limit;
+    private boolean active;
+    private boolean twoFactorVerification;
 
 }

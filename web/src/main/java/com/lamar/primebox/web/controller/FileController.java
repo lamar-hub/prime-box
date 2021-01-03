@@ -109,7 +109,7 @@ public class FileController {
         final FileDownloadDto fileDownloadDto = fileService.getFile(fileId);
         final ByteArrayResource resource = new ByteArrayResource(fileDownloadDto.getFile());
 
-        log.info(fileDownloadDto.toString());
+//        log.info(fileDownloadDto.toString());
         return ResponseEntity
                 .ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=\"" + fileDownloadDto.getFilename() + "\"")

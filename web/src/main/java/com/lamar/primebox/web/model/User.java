@@ -37,6 +37,10 @@ public class User implements UserDetails {
     @Email
     @Column(name = "email")
     private String email;
+    
+    @NotBlank
+    @Column(name = "phone")
+    private String phone;
 
     @NotBlank
     @Column(name = "name")

@@ -32,6 +32,15 @@ public class UserController {
         this.modelMapper = modelMapper;
     }
 
+    @PutMapping
+    public ResponseEntity<?> updatePlanUser() throws Exception {
+        final UserDto userDto = this.userService.updateUserPlan(getUsernameFromSecurityContext());
+        final UserUpdateResponse updateResponse = modelMapper.map(userDto, UserUpdateResponse.class);
+
+        log.info(updateResponse.toString());
+        return ResponseEntity.ok(updateResponse);
+    }
+
     @PatchMapping
     public ResponseEntity<?> updateUser(@RequestBody @Valid UserUpdateRequest updateRequest) throws Exception {
         final UserUpdateDto userUpdateDto = modelMapper.map(updateRequest, UserUpdateDto.class)

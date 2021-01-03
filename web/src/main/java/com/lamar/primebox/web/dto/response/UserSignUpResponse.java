@@ -15,6 +15,7 @@ public class UserSignUpResponse implements Serializable {
 
     private String userId;
     private String email;
+    private String phone;
     private String name;
     private String surname;
     private long stored;

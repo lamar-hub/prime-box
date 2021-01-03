@@ -30,6 +30,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
             return User.builder()
                        .userId(userDto.getUserId())
                        .email(userDto.getEmail())
+                       .phone(userDto.getPhone())
                        .password(userDto.getPassword())
                        .name(userDto.getName())
                        .surname(userDto.getSurname())

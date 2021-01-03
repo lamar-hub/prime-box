@@ -53,6 +53,7 @@ public class UserServiceImpl implements UserService {
     public UserDto addUser(UserBasicDto userBasicDto) {
         final User user = User.builder()
                               .email(userBasicDto.getUsername())
+                              .phone(userBasicDto.getPhone())
                               .name(userBasicDto.getName())
                               .surname(userBasicDto.getSurname())
                               .stored(capacityUtil.getDefaultStored())
@@ -76,10 +77,25 @@ public class UserServiceImpl implements UserService {
             throw new Exception("user not found");
         }
 
-        user.setName(userUpdateDto.getName())
+        user.setPhone(userUpdateDto.getPhone())
+            .setName(userUpdateDto.getName())
             .setSurname(userUpdateDto.getSurname())
-            .setPassword(passwordEncoder.encode(userUpdateDto.getPassword()))
+            .setActive(userUpdateDto.isActive())
             .setTwoFactorVerification(userUpdateDto.isTwoFactorVerification());
+        return modelMapper.map(user, UserDto.class);
+    }
+
+    @Override
+    @Transactional
+    public UserDto updateUserPlan(String username) throws Exception {
+        final User user = userDao.getByEmail(username);
+
+        if (user == null) {
+            log.error("user not found");
+            throw new Exception("user not found");
+        }
+        
+        user.setLimit(capacityUtil.getLimit(Optional.of(user.getLimit())));
         return modelMapper.map(user, UserDto.class);
     }
 
